@@ -20,6 +20,10 @@ Route::get('/forgot-password', function () {
     return view('auth.forgot-password');
 });
 
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->name('dashboard');
+
 Route::get('/health', function () {
     return response()->json([
         'status' => 'ok',
