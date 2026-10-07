@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In - WorkLeave</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Poppins', sans-serif; } </style>
+    <!-- Google Fonts: Poppins & Montserrat Alternates -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat+Alternates:wght@600;700&display=swap" rel="stylesheet">
+    <style> 
+        body { font-family: 'Poppins', sans-serif; } 
+        .brand-font { font-family: 'Montserrat Alternates', sans-serif; }
+    </style>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -32,8 +36,8 @@
 
     <!-- Section Brand Logo -->
     <div class="absolute top-6 left-6 flex items-center space-x-3">
-        <img src="{{ asset('img/logo.png') }}" alt="WorkLeave" class="h-20">
-        <span class="text-3xl font-bold tracking-tight text-[#9B0010]">WorkLeave.com</span>
+        <img src="{{ asset('img/logo.png') }}" alt="WorkLeave" class="h-10 w-auto object-contain">
+        <span class="text-2xl font-bold tracking-tight text-[#9B0010] brand-font">WorkLeave.com</span>
     </div>
 
     <!-- Main Container -->

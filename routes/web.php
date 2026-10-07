@@ -21,14 +21,9 @@ Route::get('/forgot-password', function () {
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
-})->name('dashboard');
+    return view('user.dashboard.index');
+});
 
-Route::get('/health', function () {
-    return response()->json([
-        'status' => 'ok',
-        'service' => 'WorkLeave Backend',
-        'database' => config('database.default'),
-        'timestamp' => now()->toIso8601String(),
-    ]);
+Route::get('/leave/create', function () {
+    return view('user.leave.create'); // Halaman form ajukan cuti
 });
