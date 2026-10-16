@@ -25,5 +25,9 @@ Route::get('/dashboard', function () {
 });
 
 Route::get('/leave/create', function () {
-    return view('user.leave.create'); // Halaman form ajukan cuti
+    return view('user.leave.create'); 
+});
+
+Route::get('/leave/history', function () {
+    return view('user.leave.history'); 
 });
