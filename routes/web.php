@@ -31,3 +31,18 @@ Route::get('/leave/create', function () {
 Route::get('/leave/history', function () {
     return view('user.leave.history'); 
 });
+
+// Admin Routes
+Route::prefix('admin')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard.index');
+    })->name('admin.dashboard');
+
+    Route::get('/approvals', function () {
+        return view('admin.approvals.index');
+    })->name('admin.approvals');
+
+    Route::get('/employee/{name?}', function ($name = 'Siti') {
+        return view('admin.employee.history', ['name' => ucfirst($name)]);
+    })->name('admin.employee.history');
+});
