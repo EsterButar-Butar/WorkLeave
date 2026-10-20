@@ -13,15 +13,29 @@
     </style>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-[#FFFFFF] text-[#2D2D2D] min-h-screen flex antialiased">
 
-    <!-- Panggil Sidebar Admin -->
-    @include('admin.sidebar')
+    {{-- Tailwind CDN fallback jika Vite belum dikompilasi --}}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Saat dimuat dalam iframe modal, hilangkan min-height agar tidak overflow */
+        body.in-modal { background: #ffffff !important; }
+        body.in-modal #mainContentWrapper { min-height: unset; }
+    </style>
+</head>
+<body class="bg-[#FFFFFF] text-[#2D2D2D] min-h-screen flex antialiased" id="historyBody">
+
+    <script>
+        // Deteksi apakah page ini dimuat dalam iframe modal
+        try {
+            if (window.self !== window.top) {
+                document.getElementById('historyBody').classList.add('in-modal');
+            }
+        } catch (e) { /* cross-origin guard */ }
+    </script>
 
     <!-- MAIN CONTENT WRAPPER -->
-    <div id="mainContentWrapper" class="flex-1 flex flex-col pl-72 bg-[#FFFFFF] min-h-screen min-w-0 transition-all duration-300">
-        <main class="p-8 lg:p-10 bg-[#FFFFFF] flex-1">
+    <div id="mainContentWrapper" class="flex-1 flex flex-col bg-[#FFFFFF] min-h-screen min-w-0 transition-all duration-300">
+        <main class="p-6 lg:p-8 bg-[#FFFFFF] flex-1">
             <div class="space-y-6 max-w-7xl mx-auto bg-[#FFFFFF]">
                 
                 <!-- TOP HEADER BAR: JUDUL & TOMBOL AKSI -->
@@ -49,13 +63,24 @@
                         </div>
 
                         <!-- Tombol Tutup (Kembali ke Dashboard) -->
-                        <a href="{{ url('/admin/dashboard') }}"
-                           class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-semibold text-[#5D5D5D] hover:text-[#2D2D2D] transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                            </svg>
-                            <span>Tutup</span>
-                        </a>
+                         @if(request()->boolean('modal'))
+                            <button type="button"
+                                    onclick="window.parent.postMessage('workleave:close-riwayat', window.location.origin)"
+                                    class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-semibold text-[#5D5D5D] hover:text-[#2D2D2D] transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                                <span>Tutup</span>
+                            </button>
+                        @else
+                            <a href="{{ url('/admin/dashboard') }}"
+                               class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-semibold text-[#5D5D5D] hover:text-[#2D2D2D] transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                                <span>Tutup</span>
+                            </a>
+                        @endif
                     </div>
                 </div>
 

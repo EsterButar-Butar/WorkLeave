@@ -29,7 +29,7 @@
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
-            <span class="px-3.5 py-1 rounded-full bg-[#FEF9E7] text-[#D97706] text-xs font-semibold whitespace-nowrap">
+            <span id="popupStatusBadge" class="px-3.5 py-1 rounded-full bg-[#FEF9E7] text-[#D97706] text-xs font-semibold whitespace-nowrap">
                 Menunggu
             </span>
             <button type="button" onclick="closeLeaveNotification()" class="p-1 text-gray-300 hover:text-gray-500 rounded-lg transition-colors cursor-pointer" title="Tutup Notifikasi">
@@ -113,20 +113,20 @@
 
     <!-- 5. Tiga Tombol Aksi: Setujui, Tunda, Tolak -->
     <div class="grid grid-cols-3 gap-3 pt-4 mt-1">
-        <!-- Setujui (Hijau) -> Langsung masuk ke Riwayat Pengajuan Cuti Siti dengan status Disetujui -->
-        <a href="{{ url('/admin/employee/siti?approved=1') }}"
-           class="w-full py-2.5 rounded-xl bg-[#E6F8F0] hover:bg-[#d1f2e4] text-[#10B981] font-bold text-xs transition-colors shadow-xs text-center cursor-pointer inline-flex items-center justify-center">
+        <!-- Setujui (Hijau) -->
+        <button type="button" onclick="handleLeaveAction('setujui')"
+                class="w-full py-2.5 rounded-xl bg-[#E6F8F0] hover:bg-[#d1f2e4] text-[#10B981] font-bold text-xs transition-colors shadow-xs text-center cursor-pointer">
             Setujui
-        </a>
+        </button>
 
         <!-- Tunda (Kuning) -->
-        <button type="button" onclick="handleLeaveAction('Tunda')"
+        <button type="button" onclick="handleLeaveAction('tunda')"
                 class="w-full py-2.5 rounded-xl bg-[#FEF9E7] hover:bg-[#fdf0cc] text-[#D97706] font-bold text-xs transition-colors shadow-xs text-center cursor-pointer">
             Tunda
         </button>
 
         <!-- Tolak (Merah) -->
-        <button type="button" onclick="handleLeaveAction('Tolak')"
+        <button type="button" onclick="handleLeaveAction('tolak')"
                 class="w-full py-2.5 rounded-xl bg-[#FDECEC] hover:bg-[#fcd7d7] text-[#DC2626] font-bold text-xs transition-colors shadow-xs text-center cursor-pointer">
             Tolak
         </button>
@@ -152,7 +152,7 @@
     function closeLeaveNotification() {
         const card = document.getElementById('leaveRequestPopup');
         const reopenBtn = document.getElementById('reopenNotificationBtn');
-        if (card) card.classList.add('hidden');
+        if (card) { card.classList.add('hidden'); }
         if (reopenBtn) {
             reopenBtn.classList.remove('hidden');
             reopenBtn.classList.add('flex');
@@ -170,7 +170,12 @@
     }
 
     function handleLeaveAction(action) {
-        alert('Pengajuan cuti berhasil di-' + action + '!');
+        // Tutup card notifikasi
         closeLeaveNotification();
+
+        // Tampilkan toast notification dari index.blade.php
+        if (typeof showToastNotification === 'function') {
+            showToastNotification(action);
+        }
     }
 </script>

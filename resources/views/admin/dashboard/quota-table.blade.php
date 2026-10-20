@@ -36,6 +36,7 @@
                     <td class="py-4 px-4 text-center font-medium">{{ $emp['sakit'] }}</td>
                     <td class="py-4 px-4 text-center">
                         <a href="{{ url('/admin/employee/' . strtolower($emp['name'])) }}"
+                           data-riwayat-modal
                            class="inline-block px-5 py-1.5 rounded-lg border border-[#48BB88] text-[#48BB88] hover:bg-[#48BB88] hover:text-white font-medium text-xs transition-all shadow-2xs">
                             Detail
                         </a>
