@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,16 +22,28 @@ Route::get('/forgot-password', function () {
     return view('auth.forgot-password');
 });
 
-Route::get('/dashboard', function () {
-    return view('user.dashboard.index');
-});
+// Route untuk Proses Logout
+Route::post('/logout', function (Request $request) {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
 
-Route::get('/leave/create', function () {
-    return view('user.leave.create'); 
-});
+    return redirect('/');
+})->name('logout');
 
-Route::get('/leave/history', function () {
-    return view('user.leave.history'); 
+// User Routes 
+Route::group([], function () {
+    Route::get('/dashboard', function () {
+        return view('user.dashboard.index');
+    })->name('dashboard');
+
+    Route::get('/leave/create', function () {
+        return view('user.leave.create'); 
+    })->name('leave.create');
+
+    Route::get('/leave/history', function () {
+        return view('user.leave.history'); 
+    })->name('leave.history');
 });
 
 // Admin Routes
