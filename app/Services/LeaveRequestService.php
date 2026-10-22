@@ -30,8 +30,8 @@ class LeaveRequestService
             throw new InvalidArgumentException('Tanggal selesai tidak boleh lebih awal dari tanggal mulai.');
         }
 
-        // Hitung total hari kerja (tanpa weekend)
-        $totalDays = $this->balanceService->calculateWorkingDays($startDate, $endDate);
+        // Hitung total hari yang memotong kuota (weekend & hari libur nasional dikecualikan untuk Cuti Tahunan)
+        $totalDays = $this->balanceService->calculateWorkingDays($startDate, $endDate, $leaveType->code);
         if ($totalDays <= 0) {
             throw new InvalidArgumentException('Pengajuan harus mencakup minimal 1 hari kerja aktif.');
         }

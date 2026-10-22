@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Public Authentication
+Route::post('/register', [AuthController::class, 'register'])->name('api.register');
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');
 
 // Protected Routes (Terautentikasi)
@@ -29,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('leave-requests')->name('api.leave.')->group(function () {
         Route::get('/', [LeaveRequestController::class, 'index'])->name('index');
         Route::get('/form-info', [LeaveRequestController::class, 'formInfo'])->name('form_info');
+        Route::post('/calculate-days', [LeaveRequestController::class, 'calculateDays'])->name('calculate');
         Route::post('/', [LeaveRequestController::class, 'store'])->name('store');
         Route::get('/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('show');
         Route::post('/{leaveRequest}/cancel', [LeaveRequestController::class, 'cancel'])->name('cancel');

@@ -8,31 +8,28 @@ use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
-class LeaveBalanceService
-{
+    public function __construct(
+        protected ?HolidayService $holidayService = null
+    ) {
+        $this->holidayService = $holidayService ?? new HolidayService();
+    }
+
     /**
-     * Hitung total hari kerja antara dua tanggal (melewati hari Sabtu dan Minggu).
+     * Hitung total hari kerja antara dua tanggal.
+     * Khusus Cuti Tahunan (ANNUAL): Hari akhir pekan (Sabtu/Minggu) dan hari libur nasional Indonesia tidak dihitung.
      */
-    public function calculateWorkingDays(string|Carbon $startDate, string|Carbon $endDate): int
+    public function calculateWorkingDays(string|Carbon $startDate, string|Carbon $endDate, string $leaveTypeCode = 'ANNUAL'): int
     {
-        $start = Carbon::parse($startDate)->startOfDay();
-        $end = Carbon::parse($endDate)->startOfDay();
+        $result = $this->holidayService->calculateDays($startDate, $endDate, $leaveTypeCode);
+        return $result['deducted_days'];
+    }
 
-        if ($end->lt($start)) {
-            return 0;
-        }
-
-        $period = CarbonPeriod::create($start, $end);
-        $workingDays = 0;
-
-        foreach ($period as $date) {
-            // Hari kerja: Senin (1) s/d Jumat (5)
-            if (!$date->isWeekend()) {
-                $workingDays++;
-            }
-        }
-
-        return $workingDays;
+    /**
+     * Dapatkan rincian kalkulasi hari cuti secara lengkap (termasuk weekend & hari libur).
+     */
+    public function getDetailedCalculation(string|Carbon $startDate, string|Carbon $endDate, string $leaveTypeCode = 'ANNUAL'): array
+    {
+        return $this->holidayService->calculateDays($startDate, $endDate, $leaveTypeCode);
     }
 
     /**
@@ -42,7 +39,7 @@ class LeaveBalanceService
     {
         $year = $year ?? (int) date('Y');
 
-        return LeaveBalance::firstOrCreate(
+        $balance = LeaveBalance::firstOrCreate(
             [
                 'user_id' => $user->id,
                 'leave_type_id' => $leaveType->id,
@@ -54,6 +51,15 @@ class LeaveBalanceService
                 'remaining_quota' => $leaveType->default_quota,
             ]
         );
+
+        // Pastikan kuota Cuti Sakit yang belum terpakai tersinkron dengan batas ketentuan 7 hari kerja
+        if ($leaveType->code === 'SICK' && $balance->initial_quota > 7 && $balance->used_quota === 0) {
+            $balance->initial_quota = 7;
+            $balance->remaining_quota = 7;
+            $balance->save();
+        }
+
+        return $balance;
     }
 
     /**

@@ -142,4 +142,36 @@ class LeaveRequestController extends Controller
             ], 400);
         }
     }
+
+    /**
+     * Hitung kalkulasi hari cuti secara transparan (weekend & libur nasional).
+     */
+    public function calculateDays(Request $request, \App\Services\HolidayService $holidayService): JsonResponse
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'leave_type_code' => 'nullable|string',
+            'leave_type_id' => 'nullable',
+        ]);
+
+        $leaveTypeCode = $request->input('leave_type_code', 'ANNUAL');
+        if ($leaveTypeId = $request->input('leave_type_id')) {
+            $type = LeaveType::find($leaveTypeId);
+            if ($type) {
+                $leaveTypeCode = $type->code;
+            }
+        }
+
+        $result = $holidayService->calculateDays(
+            $request->input('start_date'),
+            $request->input('end_date'),
+            $leaveTypeCode
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $result,
+        ]);
+    }
 }

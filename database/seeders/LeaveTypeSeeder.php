@@ -22,41 +22,25 @@ class LeaveTypeSeeder extends Seeder
                 'description' => 'Hak cuti tahunan mitra kerja sebanyak 12 hari kerja per tahun kalender.',
             ],
             [
-                'name' => 'Cuti Sakit',
-                'code' => 'SICK',
-                'default_quota' => 14,
-                'is_paid' => true,
-                'requires_attachment' => true,
-                'description' => 'Izin tidak masuk kerja karena sakit dengan melampirkan surat keterangan dokter.',
-            ],
-            [
-                'name' => 'Cuti Alasan Penting',
-                'code' => 'IMPORTANT',
-                'default_quota' => 5,
-                'is_paid' => true,
-                'requires_attachment' => false,
-                'description' => 'Cuti untuk keperluan darurat keluarga, pernikahan, atau kedukaan.',
-            ],
-            [
-                'name' => 'Cuti Melahirkan',
+                'name' => 'Cuti Bersalin',
                 'code' => 'MATERNITY',
                 'default_quota' => 90,
                 'is_paid' => true,
                 'requires_attachment' => true,
-                'description' => 'Hak cuti persalinan bagi mitra wanita dengan masa 3 bulan.',
+                'description' => 'Hak cuti persalinan bagi mitra wanita dengan masa 90 hari kalender penuh.',
             ],
             [
-                'name' => 'Izin Non-Cuti / Khusus',
-                'code' => 'SPECIAL',
-                'default_quota' => 0,
-                'is_paid' => false,
-                'requires_attachment' => false,
-                'description' => 'Izin dispensasi khusus atau keperluan mendadak di luar kuota cuti tahunan.',
+                'name' => 'Cuti Sakit',
+                'code' => 'SICK',
+                'default_quota' => 7,
+                'is_paid' => true,
+                'requires_attachment' => true,
+                'description' => 'Izin tidak masuk kerja karena sakit dengan melampirkan surat dokter (maksimal 7 hari kerja).',
             ],
         ];
 
         foreach ($types as $type) {
-            LeaveType::firstOrCreate(
+            LeaveType::updateOrCreate(
                 ['code' => $type['code']],
                 $type
             );

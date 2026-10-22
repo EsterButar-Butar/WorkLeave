@@ -55,16 +55,28 @@
                 
                 <h1 class="text-[40px] font-bold text-left mb-10 tracking-tight text-black">Sign Up</h1>
 
-                <form action="#" method="POST" class="space-y-6">
+                <form action="{{ route('register.post') }}" method="POST" class="space-y-6">
+                    @csrf
+
+                    @if ($errors->any())
+                        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                            <ul class="list-disc list-inside space-y-1">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <!-- Input: User Name -->
                     <div>
-                        <input type="text" placeholder="User name"
+                        <input type="text" name="name" value="{{ old('name') }}" required placeholder="User name"
                             class="w-full bg-wl-input-bg text-wl-black px-6 py-4 rounded-xl focus:outline-none focus:ring-1 focus:ring-wl-red-light placeholder:text-wl-input-text placeholder:font-light">
                     </div>
 
                     <!-- Input: Email Address dengan Icon -->
                     <div class="relative">
-                        <input type="email" placeholder="Email address"
+                        <input type="email" name="email" value="{{ old('email') }}" required placeholder="Email address"
                             class="w-full bg-wl-input-bg text-wl-black px-6 py-4 rounded-xl focus:outline-none focus:ring-1 focus:ring-wl-red-light placeholder:text-wl-input-text placeholder:font-light">
                         <div class="absolute inset-y-0 right-6 flex items-center text-wl-grey-light">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -75,7 +87,7 @@
 
                     <!-- Input: Password dengan Toggle Visibility -->
                     <div class="relative">
-                        <input type="password" id="password-input" placeholder="Password"
+                        <input type="password" name="password" id="password-input" required placeholder="Password"
                             class="w-full bg-wl-input-bg text-wl-black px-6 py-4 rounded-xl focus:outline-none focus:ring-1 focus:ring-wl-red-light placeholder:text-wl-input-text placeholder:font-light">
                         
                         <div onclick="togglePassword()" class="absolute inset-y-0 right-6 flex items-center cursor-pointer text-wl-grey-light hover:text-wl-grey-dark">
@@ -92,7 +104,7 @@
 
                     <!-- Button: Register -->
                     <div class="pt-2 pb-2">
-                        <button type="button"
+                        <button type="submit"
                             class="w-full bg-[#C12132] text-white font-medium py-4 rounded-xl hover:bg-wl-red-dark transition-all duration-300 shadow-[0_8px_25px_rgba(193,33,50,0.25)]">
                             Register
                         </button>

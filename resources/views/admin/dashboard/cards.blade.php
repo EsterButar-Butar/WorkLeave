@@ -1,60 +1,306 @@
-<!-- 4 KARTU STATISTIK DASHBOARD ADMIN SESUAI DESAIN -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+<!-- 4 KARTU STATISTIK DASHBOARD ADMIN (IN-PAGE INTERAKTIF) -->
+<div class="space-y-4">
 
-    <!-- Card 1: Total Pegawai (Soft Blue) -->
-    <div class="bg-[#EBF2FE] rounded-2xl p-5 border border-blue-100/60 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center gap-4">
-        <div class="w-14 h-14 rounded-2xl bg-[#5B8DEF] flex items-center justify-center text-white shadow-sm shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-            </svg>
+    <!-- BARIS 4 KARTU STATISTIK -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+
+        <!-- Card 1: Total Pegawai (Soft Blue) -->
+        <div id="statCard_total_pegawai" 
+             onclick="toggleCardNames('total_pegawai')" 
+             role="button"
+             tabindex="0"
+             title="Klik untuk melihat daftar nama seluruh pegawai aktif"
+             class="bg-[#EBF2FE] rounded-2xl p-5 border border-blue-100/60 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-[#5B8DEF] flex items-center justify-center text-white shadow-sm shrink-0 group-hover:scale-105 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-[#5D5D5D] block">Total Pegawai</span>
+                    <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">12</span>
+                    <span class="text-[11px] text-[#8C8C8C] block mt-0.5">Pegawai aktif</span>
+                </div>
+            </div>
+            <div id="arrow_total_pegawai" class="text-blue-400 group-hover:text-blue-600 transition-transform duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+            </div>
         </div>
-        <div>
-            <span class="text-xs font-medium text-[#5D5D5D] block">Total Pegawai</span>
-            <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">12</span>
-            <span class="text-[11px] text-[#8C8C8C] block mt-0.5">Pegawai aktif</span>
+
+        <!-- Card 2: Cuti Disetujui (Soft Green) -->
+        <div id="statCard_disetujui" 
+             onclick="toggleCardNames('disetujui')" 
+             role="button"
+             tabindex="0"
+             title="Klik untuk melihat daftar nama yang cutinya disetujui"
+             class="bg-[#E7F7F0] rounded-2xl p-5 border border-emerald-100/60 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-[#48BB88] flex items-center justify-center text-white shadow-sm shrink-0 group-hover:scale-105 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-[#5D5D5D] block">Cuti Disetujui</span>
+                    <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">9</span>
+                    <span class="text-[11px] text-[#8C8C8C] block mt-0.5">Bulan ini</span>
+                </div>
+            </div>
+            <div id="arrow_disetujui" class="text-emerald-400 group-hover:text-emerald-600 transition-transform duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+            </div>
         </div>
+
+        <!-- Card 3: Pengajuan Cuti (Soft Amber/Yellow) -->
+        <div id="statCard_pending" 
+             onclick="toggleCardNames('pending')" 
+             role="button"
+             tabindex="0"
+             title="Klik untuk melihat daftar nama yang sedang mengajukan cuti"
+             class="bg-[#FBF4E6] rounded-2xl p-5 border border-amber-100/60 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-[#DDA022] flex items-center justify-center text-white shadow-sm shrink-0 group-hover:scale-105 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-[#5D5D5D] block">Pengajuan Cuti</span>
+                    <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">11</span>
+                    <span class="text-[11px] text-[#8C8C8C] block mt-0.5">Bulan ini</span>
+                </div>
+            </div>
+            <div id="arrow_pending" class="text-amber-400 group-hover:text-amber-600 transition-transform duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Card 4: Cuti Ditolak (Soft Red) -->
+        <div id="statCard_ditolak" 
+             onclick="toggleCardNames('ditolak')" 
+             role="button"
+             tabindex="0"
+             title="Klik untuk melihat daftar nama yang cutinya ditolak"
+             class="bg-[#FBE8EC] rounded-2xl p-5 border border-red-100/60 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center justify-between gap-4 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-[#C12132] flex items-center justify-center text-white shadow-sm shrink-0 group-hover:scale-105 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xs font-medium text-[#5D5D5D] block">Cuti Ditolak</span>
+                    <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">2</span>
+                    <span class="text-[11px] text-[#8C8C8C] block mt-0.5">Bulan ini</span>
+                </div>
+            </div>
+            <div id="arrow_ditolak" class="text-red-400 group-hover:text-red-600 transition-transform duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Card 2: Cuti Disetujui (Soft Green) -->
-    <div class="bg-[#E7F7F0] rounded-2xl p-5 border border-emerald-100/60 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center gap-4">
-        <div class="w-14 h-14 rounded-2xl bg-[#48BB88] flex items-center justify-center text-white shadow-sm shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-            </svg>
+    <!-- PANEL DAFTAR NAMA INLINE (MUNCUL LANGSUNG DI BAWAH KARTU PADA HALAMAN INI) -->
+    <div id="inlineNamesPanel" 
+         class="hidden bg-white rounded-2xl p-6 border shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300">
+        
+        <!-- Header Panel -->
+        <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+            <div class="flex items-center gap-3">
+                <span id="panelCategoryDot" class="w-3 h-3 rounded-full bg-[#C12132]"></span>
+                <h3 id="panelCategoryTitle" class="text-sm font-bold text-[#2D2D2D]">Daftar Nama Pegawai</h3>
+                <span id="panelCategoryCount" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-700">0 Nama</span>
+            </div>
+            
+            <button type="button" 
+                    onclick="closeInlineNames()" 
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors cursor-pointer"
+                    title="Tutup list">
+                <span>Tutup</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
         </div>
-        <div>
-            <span class="text-xs font-medium text-[#5D5D5D] block">Cuti Disetujui</span>
-            <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">9</span>
-            <span class="text-[11px] text-[#8C8C8C] block mt-0.5">Bulan ini</span>
-        </div>
-    </div>
 
-    <!-- Card 3: Pengajuan Cuti (Soft Amber/Yellow) -->
-    <div class="bg-[#FBF4E6] rounded-2xl p-5 border border-amber-100/60 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center gap-4">
-        <div class="w-14 h-14 rounded-2xl bg-[#DDA022] flex items-center justify-center text-white shadow-sm shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-            </svg>
+        <!-- Grid List Nama Saja -->
+        <div id="panelNamesList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 pt-4">
+            <!-- List nama di-render otomatis oleh JavaScript -->
         </div>
-        <div>
-            <span class="text-xs font-medium text-[#5D5D5D] block">Pengajuan Cuti</span>
-            <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">11</span>
-            <span class="text-[11px] text-[#8C8C8C] block mt-0.5">Bulan ini</span>
-        </div>
-    </div>
 
-    <!-- Card 4: Cuti Ditolak (Soft Red) -->
-    <div class="bg-[#FBE8EC] rounded-2xl p-5 border border-red-100/60 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center gap-4">
-        <div class="w-14 h-14 rounded-2xl bg-[#C12132] flex items-center justify-center text-white shadow-sm shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-            </svg>
-        </div>
-        <div>
-            <span class="text-xs font-medium text-[#5D5D5D] block">Cuti Ditolak</span>
-            <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">2</span>
-            <span class="text-[11px] text-[#8C8C8C] block mt-0.5">Bulan ini</span>
-        </div>
     </div>
 
 </div>
+
+<script>
+    // DATA LIST NAMA PERSIS SESUAI KETENTUAN MASING-MASING KARTU
+    window.CARD_NAMES_DATA = {
+        total_pegawai: {
+            title: 'Daftar Seluruh Pegawai Aktif',
+            badgeBg: 'bg-blue-100 text-blue-700',
+            dotColor: 'bg-[#5B8DEF]',
+            cardBorder: 'border-blue-400 ring-2 ring-blue-100',
+            names: [
+                'Budi Santoso',
+                'Siti Rahmawati',
+                'Dimas Prasetyo',
+                'Ayu Pratiwi',
+                'Putri Wulandari',
+                'Yanto Nugroho',
+                'Yanti Kusuma',
+                'Putra Pratama',
+                'Dani Firmansyah',
+                'Titi Handayani',
+                'Rian Hidayat',
+                'Maya Anggraini'
+            ]
+        },
+        disetujui: {
+            title: 'Daftar Nama Pegawai yang Cuti Disetujui',
+            badgeBg: 'bg-emerald-100 text-emerald-700',
+            dotColor: 'bg-[#48BB88]',
+            cardBorder: 'border-emerald-400 ring-2 ring-emerald-100',
+            names: [
+                'Budi Santoso',
+                'Dimas Prasetyo',
+                'Titi Handayani',
+                'Putri Wulandari',
+                'Ayu Pratiwi',
+                'Yanto Nugroho',
+                'Yanti Kusuma',
+                'Putra Pratama',
+                'Dani Firmansyah'
+            ]
+        },
+        pending: {
+            title: 'Daftar Nama Pegawai yang Mengajukan Cuti',
+            badgeBg: 'bg-amber-100 text-amber-700',
+            dotColor: 'bg-[#DDA022]',
+            cardBorder: 'border-amber-400 ring-2 ring-amber-100',
+            names: [
+                'Siti Rahmawati',
+                'Budi Santoso',
+                'Maya Anggraini',
+                'Rian Hidayat',
+                'Ayu Pratiwi',
+                'Putri Wulandari',
+                'Yanto Nugroho',
+                'Yanti Kusuma',
+                'Putra Pratama',
+                'Dani Firmansyah',
+                'Dimas Prasetyo'
+            ]
+        },
+        ditolak: {
+            title: 'Daftar Nama Pegawai yang Cuti Ditolak',
+            badgeBg: 'bg-rose-100 text-rose-700',
+            dotColor: 'bg-[#C12132]',
+            cardBorder: 'border-rose-400 ring-2 ring-rose-100',
+            names: [
+                'Dimas Prasetyo',
+                'Dani Firmansyah'
+            ]
+        }
+    };
+
+    let activeCardKey = null;
+
+    /**
+     * Buka / Tutup panel daftar nama langsung di bawah kartu
+     */
+    function toggleCardNames(type) {
+        const panel = document.getElementById('inlineNamesPanel');
+        
+        // Jika kartu yang sama diklik lagi saat terbuka, tutup panelnya
+        if (activeCardKey === type && !panel.classList.contains('hidden')) {
+            closeInlineNames();
+            return;
+        }
+
+        activeCardKey = type;
+        const config = window.CARD_NAMES_DATA[type];
+        if (!config) return;
+
+        // Reset highlight kartu-kartu lain
+        ['total_pegawai', 'disetujui', 'pending', 'ditolak'].forEach(k => {
+            const el = document.getElementById(`statCard_${k}`);
+            const arrow = document.getElementById(`arrow_${k}`);
+            if (el) {
+                el.classList.remove('border-blue-400', 'border-emerald-400', 'border-amber-400', 'border-rose-400', 'ring-2', 'ring-blue-100', 'ring-emerald-100', 'ring-amber-100', 'ring-rose-100', 'bg-white');
+            }
+            if (arrow) {
+                arrow.classList.remove('rotate-90');
+            }
+        });
+
+        // Highlight kartu yang aktif
+        const activeCard = document.getElementById(`statCard_${type}`);
+        const activeArrow = document.getElementById(`arrow_${type}`);
+        if (activeCard) {
+            config.cardBorder.split(' ').forEach(cls => activeCard.classList.add(cls));
+            activeCard.classList.add('bg-white');
+        }
+        if (activeArrow) {
+            activeArrow.classList.add('rotate-90');
+        }
+
+        // Update teks header & dot warna
+        document.getElementById('panelCategoryTitle').innerText = config.title;
+        document.getElementById('panelCategoryCount').innerText = `${config.names.length} Nama`;
+        document.getElementById('panelCategoryCount').className = `px-2.5 py-0.5 rounded-full text-xs font-bold ${config.badgeBg}`;
+        document.getElementById('panelCategoryDot').className = `w-3 h-3 rounded-full ${config.dotColor}`;
+
+        // Render hanya list nama-namanya saja
+        const listContainer = document.getElementById('panelNamesList');
+        let html = '';
+        config.names.forEach((name, index) => {
+            html += `
+                <div class="flex items-center gap-3 p-3.5 rounded-xl bg-gray-50/80 border border-gray-100 hover:bg-gray-100/80 transition-colors">
+                    <span class="w-7 h-7 rounded-lg ${config.dotColor} text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                        ${index + 1}
+                    </span>
+                    <span class="font-semibold text-xs text-[#2D2D2D] truncate">${name}</span>
+                </div>
+            `;
+        });
+        listContainer.innerHTML = html;
+
+        // Tampilkan panel
+        panel.classList.remove('hidden');
+
+        // Scroll halus sedikit jika perlu
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    /**
+     * Tutup panel daftar nama
+     */
+    function closeInlineNames() {
+        const panel = document.getElementById('inlineNamesPanel');
+        if (panel) panel.classList.add('hidden');
+
+        // Reset highlight semua kartu
+        ['total_pegawai', 'disetujui', 'pending', 'ditolak'].forEach(k => {
+            const el = document.getElementById(`statCard_${k}`);
+            const arrow = document.getElementById(`arrow_${k}`);
+            if (el) {
+                el.classList.remove('border-blue-400', 'border-emerald-400', 'border-amber-400', 'border-rose-400', 'ring-2', 'ring-blue-100', 'ring-emerald-100', 'ring-amber-100', 'ring-rose-100', 'bg-white');
+            }
+            if (arrow) {
+                arrow.classList.remove('rotate-90');
+            }
+        });
+
+        activeCardKey = null;
+    }
+</script>

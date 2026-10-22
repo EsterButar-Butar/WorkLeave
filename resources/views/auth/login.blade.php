@@ -54,14 +54,28 @@
                 
                 <h1 class="text-[40px] font-bold text-left mb-10 tracking-tight text-black">Sign in</h1>
 
-                <form action="#" method="POST" class="space-y-6">
+                <form action="{{ route('login.post') }}" method="POST" class="space-y-6">
+                    @csrf
+
+                    @if (session('success'))
+                        <div class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
+
                     <div>
-                        <input type="text" placeholder="Enter email or user name"
+                        <input type="email" name="email" value="{{ old('email') }}" required placeholder="Enter email address"
                             class="w-full bg-wl-input-bg text-wl-black px-6 py-4 rounded-xl focus:outline-none focus:ring-1 focus:ring-wl-red-light placeholder:text-wl-input-text placeholder:font-light">
                     </div>
 
                     <div class="relative">
-                        <input type="password" id="password-input" placeholder="Password"
+                        <input type="password" name="password" id="password-input" required placeholder="Password"
                             class="w-full bg-wl-input-bg text-wl-black px-6 py-4 rounded-xl focus:outline-none focus:ring-1 focus:ring-wl-red-light placeholder:text-wl-input-text placeholder:font-light">
                         
                         <div onclick="togglePassword()" class="absolute inset-y-0 right-6 flex items-center cursor-pointer text-wl-grey-light hover:text-wl-grey-dark">
@@ -76,7 +90,7 @@
                     </div>
 
                     <div class="pt-4 pb-2">
-                        <button type="button"
+                        <button type="submit"
                             class="w-full bg-[#C12132] text-white font-medium py-4 rounded-xl hover:bg-wl-red-dark transition-all duration-300 shadow-[0_8px_25px_rgba(193,33,50,0.25)]">
                             Login
                         </button>
