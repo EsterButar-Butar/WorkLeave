@@ -325,7 +325,7 @@ class HolidayService
         $l = (32 + 2 * $e + 2 * $i - $h - $k) % 7;
         $m = intdiv($a + 11 * $h + 22 * $l, 451);
         $month = intdiv($h + $l - 7 * $m + 114, 31);
-        $day = (($h + l - 7 * $m + 114) % 31) + 1;
+        $day = (($h + $l - 7 * $m + 114) % 31) + 1;
 
         return Carbon::create($year, $month, $day);
     }

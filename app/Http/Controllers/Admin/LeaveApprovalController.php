@@ -17,16 +17,16 @@ class LeaveApprovalController extends Controller
         protected LeaveRequestService $leaveRequestService
     ) {}
 
-    /**
-     * Dapatkan daftar antrean pengajuan cuti yang berstatus pending.
-     */
+    // Ambil daftar permohonan cuti mitra yang masih menunggu persetujuan (status pending)
     public function index(Request $request): JsonResponse
     {
+        // Query pengajuan berstatus pending dengan data user pemohon dan jenis cutinya
         $query = LeaveRequest::with([
             'user:id,name,email,nip,department,position',
             'leaveType:id,name,code,default_quota',
         ])->where('status', LeaveStatus::PENDING);
 
+        // Filter pencarian berdasarkan nama pemohon atau NIP jika diisi
         if ($search = $request->input('search')) {
             $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -34,6 +34,7 @@ class LeaveApprovalController extends Controller
             });
         }
 
+        // Ambil data pengajuan pending dengan pagination 15 item per halaman
         $pendingRequests = $query->latest()->paginate($request->integer('per_page', 15));
 
         return response()->json([
@@ -42,13 +43,12 @@ class LeaveApprovalController extends Controller
         ]);
     }
 
-    /**
-     * Setujui pengajuan cuti oleh admin.
-     */
+    // Setujui permohonan cuti mitra oleh admin
     public function approve(Request $request, LeaveRequest $leaveRequest): JsonResponse
     {
         try {
             $note = $request->input('note');
+            // Panggil service untuk setujui cuti dan potong saldo kuota mitra
             $updated = $this->leaveRequestService->approveRequest($leaveRequest, $request->user(), $note);
 
             return response()->json([
@@ -64,11 +64,10 @@ class LeaveApprovalController extends Controller
         }
     }
 
-    /**
-     * Tolak pengajuan cuti oleh admin.
-     */
+    // Tolak permohonan cuti mitra oleh admin beserta catatan alasannya
     public function reject(Request $request, LeaveRequest $leaveRequest): JsonResponse
     {
+        // Validasi wajib menyertakan alasan penolakan
         $request->validate([
             'rejection_reason' => 'required|string|max:500',
         ], [
@@ -77,6 +76,7 @@ class LeaveApprovalController extends Controller
 
         try {
             $reason = $request->input('rejection_reason');
+            // Panggil service untuk tandai rejected dan simpan riwayat log
             $updated = $this->leaveRequestService->rejectRequest($leaveRequest, $request->user(), $reason);
 
             return response()->json([

@@ -11,15 +11,15 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    /**
-     * Tampilkan data metrik dashboard pemantauan kuota dan cuti.
-     */
+    // Tampilkan data statistik dashboard untuk admin atau mitra
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
         $currentYear = (int) ($request->input('year', date('Y')));
 
+        // Logika statistik khusus jika pengguna yang login adalah admin
         if ($user->isAdmin()) {
+            // Hitung ringkasan total mitra aktif, pengajuan pending, dan cuti bulan ini
             $stats = [
                 'total_mitra' => User::where('role', 'mitra')->where('is_active', true)->count(),
                 'pending_requests' => LeaveRequest::where('status', LeaveStatus::PENDING)->count(),
@@ -33,11 +33,13 @@ class DashboardController extends Controller
                     ->sum('total_days'),
             ];
 
+            // Ambil 5 pengajuan cuti terbaru untuk tabel aktivitas
             $recentRequests = LeaveRequest::with(['user:id,name,email,nip,department', 'leaveType:id,name,code'])
                 ->latest()
                 ->take(5)
                 ->get();
 
+            // Ambil 5 antrean teratas yang butuh persetujuan segera
             $pendingList = LeaveRequest::with(['user:id,name,email,nip,department', 'leaveType:id,name,code'])
                 ->where('status', LeaveStatus::PENDING)
                 ->latest()
@@ -56,12 +58,13 @@ class DashboardController extends Controller
             ]);
         }
 
-        // Dashboard Mitra
+        // Logika data dashboard khusus untuk mitra (karyawan)
         $balances = LeaveBalance::with('leaveType:id,name,code,default_quota,is_paid,requires_attachment')
             ->where('user_id', $user->id)
             ->where('year', $currentYear)
             ->get();
 
+        // Hitung total sisa kuota, kuota terpakai, dan status cuti pribadi
         $stats = [
             'initial_quota' => (int) $balances->sum('initial_quota'),
             'used_quota' => (int) $balances->sum('used_quota'),
@@ -74,6 +77,7 @@ class DashboardController extends Controller
                 ->count(),
         ];
 
+        // Ambil 5 riwayat pengajuan cuti terakhir milik mitra ini
         $myRecentRequests = LeaveRequest::with('leaveType:id,name,code')
             ->where('user_id', $user->id)
             ->latest()
