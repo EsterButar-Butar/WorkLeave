@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\LeaveRequestController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,19 +31,22 @@ Route::get('/forgot-password', function () {
     return view('auth.forgot-password');
 })->name('password.request');
 
-Route::get('/dashboard', function () {
-    return view('user.dashboard.index');
-})->name('dashboard');
+// User Routes 
+Route::group([], function () {
+    Route::get('/dashboard', function () {
+        return view('user.dashboard.index');
+    })->name('dashboard');
 
-Route::get('/leave/create', function () {
-    return view('user.leave.create'); 
-})->name('leave.create');
+    Route::get('/leave/create', function () {
+        return view('user.leave.create'); 
+    })->name('leave.create');
 
-Route::post('/leave/calculate-days', [\App\Http\Controllers\LeaveRequestController::class, 'calculateDays'])->name('leave.calculate');
+    Route::post('/leave/calculate-days', [LeaveRequestController::class, 'calculateDays'])->name('leave.calculate');
 
-Route::get('/leave/history', function () {
-    return view('user.leave.history'); 
-})->name('leave.history');
+    Route::get('/leave/history', function () {
+        return view('user.leave.history'); 
+    })->name('leave.history');
+});
 
 // Admin Routes
 Route::prefix('admin')->group(function () {

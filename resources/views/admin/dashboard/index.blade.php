@@ -31,6 +31,8 @@
             }
         }
     </script>
+    <!-- Alpine.js untuk Dropdown Profil & Logout -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-[#FFFFFF] text-[#2D2D2D] min-h-screen flex antialiased">
 
@@ -58,9 +60,46 @@
                         </p>
                     </div>
 
-                    <!-- NOTIFIKASI PENGAJUAN CUTI (SESUAI DESAIN FIGMA) -->
-                    <div class="w-full xl:w-auto xl:absolute xl:right-0 xl:top-0 z-10 flex flex-col items-end">
-                        @include('admin.dashboard.popup-request')
+                    <!-- KANAN ATAS: NOTIFIKASI & PROFIL ADMIN (HANYA IKON SAJA) -->
+                    <div class="w-full xl:w-auto xl:absolute xl:right-0 xl:top-0 z-10 flex items-center gap-4">
+                        
+                        <!-- Notifikasi Pengajuan Cuti Asli (Popup Request) -->
+                        <div class="flex flex-col items-end">
+                            @include('admin.dashboard.popup-request')
+                        </div>
+
+                        <!-- Profil Admin Button (Hanya Ikon Saja, Persis Seperti Tombol Lonceng) -->
+                        <div class="relative" x-data="{ openDropdown: false }">
+                            <button @click="openDropdown = !openDropdown" type="button" class="relative p-2.5 bg-white border border-gray-100 shadow-sm text-gray-500 hover:bg-gray-50 rounded-2xl transition-colors cursor-pointer focus:outline-none flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                </svg>
+                            </button>
+
+                            <!-- Menu Dropdown Logout -->
+                            <div x-show="openDropdown" 
+                                 @click.away="openDropdown = false"
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-40 bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.1)] border border-gray-100 py-2 z-50 hidden"
+                                 :class="{ 'hidden': !openDropdown }">
+                                
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-[#C12132] hover:bg-red-50/60 transition-colors cursor-pointer">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                                        </svg>
+                                        <span>Logout</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -120,13 +159,10 @@
             const frame   = document.getElementById('riwayatFrame');
             const loading = document.getElementById('riwayatLoading');
 
-            /** Buka modal dengan url riwayat pegawai */
             function openRiwayat(url) {
-                // Tambahkan ?modal=1 agar history.blade.php tahu ini mode iframe
                 const modalUrl = new URL(url, window.location.origin);
                 modalUrl.searchParams.set('modal', '1');
 
-                // Tutup notifikasi pengajuan cuti jika masih terbuka
                 if (typeof closeLeaveNotification === 'function') {
                     closeLeaveNotification();
                 } else {
@@ -139,7 +175,6 @@
                     }
                 }
 
-                // Tampilkan loading lalu load iframe
                 loading.classList.remove('hidden');
                 frame.src = modalUrl.toString();
 
@@ -149,7 +184,6 @@
                 document.body.classList.add('overflow-hidden');
             }
 
-            /** Tutup modal */
             function closeRiwayat() {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
@@ -159,12 +193,10 @@
                 document.body.classList.remove('overflow-hidden');
             }
 
-            // Sembunyikan loading saat iframe selesai dimuat
             frame.addEventListener('load', function () {
                 loading.classList.add('hidden');
             });
 
-            // Pasang event listener ke semua tombol Detail yang punya data-riwayat-modal
             document.querySelectorAll('[data-riwayat-modal]').forEach(function (link) {
                 link.addEventListener('click', function (event) {
                     event.preventDefault();
@@ -172,19 +204,16 @@
                 });
             });
 
-            // Klik di luar modal box → tutup
             modal.addEventListener('click', function (event) {
                 if (event.target === modal) closeRiwayat();
             });
 
-            // Tekan Escape → tutup
             document.addEventListener('keydown', function (event) {
                 if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
                     closeRiwayat();
                 }
             });
 
-            // Terima pesan postMessage dari iframe (tombol Tutup di history.blade.php)
             window.addEventListener('message', function (event) {
                 if (event.origin === window.location.origin && event.data === 'workleave:close-riwayat') {
                     closeRiwayat();
@@ -196,10 +225,6 @@
     <div id="toastContainer" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] flex flex-col gap-3 w-full max-w-2xl px-4 pointer-events-none"></div>
 
     <script>
-        /**
-         * Tampilkan toast notification sesuai aksi yang dipilih admin.
-         * @param {string} action - 'setujui' | 'tunda' | 'tolak'
-         */
         function showToastNotification(action) {
             const config = {
                 setujui: {
@@ -237,7 +262,6 @@
             const c = config[action];
             if (!c) return;
 
-            // Buat elemen toast
             const toast = document.createElement('div');
             toast.className = `pointer-events-auto flex items-start gap-4 w-full px-5 py-4 rounded-2xl border shadow-lg ${c.wrapBg} 
                                opacity-0 translate-y-4 transition-all duration-300`;
@@ -262,14 +286,12 @@
             const container = document.getElementById('toastContainer');
             container.appendChild(toast);
 
-            // Animasi masuk
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     toast.classList.remove('opacity-0', 'translate-y-4');
                 });
             });
 
-            // Auto-dismiss setelah 5 detik
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-4');
                 setTimeout(() => toast.remove(), 300);
