@@ -63,9 +63,56 @@
                         </div>
                     @endif
 
+                    @if (session('info'))
+                        <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl text-sm">
+                            {{ session('info') }}
+                        </div>
+                    @endif
+
+                    @php
+                        $unverifiedEmail = session('unverified_email');
+                        $unverifiedUser = $unverifiedEmail ? \App\Models\User::where('email', $unverifiedEmail)->first() : null;
+                        $quickVerifyUrl = null;
+                        if ($unverifiedUser && !$unverifiedUser->hasVerifiedEmail()) {
+                            $quickVerifyUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                                'verification.verify',
+                                now()->addMinutes(60),
+                                ['id' => $unverifiedUser->id, 'hash' => sha1($unverifiedUser->getEmailForVerification())]
+                            );
+                        }
+                    @endphp
+
                     @if ($errors->any())
-                        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-                            {{ $errors->first() }}
+                        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3.5 rounded-xl text-sm space-y-3">
+                            <p class="font-medium">{{ $errors->first() }}</p>
+
+                            @if ($unverifiedEmail)
+                                <div class="pt-2.5 border-t border-red-200/80 space-y-2.5">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <!-- Tombol Kirim Ulang -->
+                                        <button type="submit" form="resendVerificationForm" class="text-xs font-semibold text-[#C12132] hover:underline inline-flex items-center gap-1.5 cursor-pointer">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                                            </svg>
+                                            <span>Kirim ulang email verifikasi</span>
+                                        </button>
+
+                                        @if ($quickVerifyUrl)
+                                            <!-- Tombol Akses Cepat Verifikasi Lokal -->
+                                            <a href="{{ $quickVerifyUrl }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C12132] text-white text-xs font-semibold hover:bg-[#9B0010] shadow-xs transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span>Verifikasi Akun Ini Sekarang</span>
+                                            </a>
+                                        @endif
+                                    </div>
+
+                                    <div class="text-[11px] text-gray-500 leading-relaxed bg-white/70 p-2.5 rounded-lg border border-red-100">
+                                        💡 <b>Info Pengujian:</b> Driver email saat ini adalah <code>log</code> (tidak dikirim ke server Gmail asli). Anda dapat langsung mengklik tombol merah <b>"Verifikasi Akun Ini Sekarang"</b> di atas atau mengecek tautan di file <code>storage/logs/laravel.log</code>.
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     @endif
 
@@ -96,6 +143,13 @@
                         </button>
                     </div>
                 </form>
+                
+                @if ($unverifiedEmail)
+                    <form id="resendVerificationForm" action="{{ route('verification.resend') }}" method="POST" class="hidden">
+                        @csrf
+                        <input type="hidden" name="email" value="{{ $unverifiedEmail }}">
+                    </form>
+                @endif
 
                 <p class="text-left text-wl-black mt-6 text-[15px]">
                     Don't have an Account? <a href="{{ url('/register') }}" class="text-[#C12132] font-semibold hover:underline ml-1">Register here !</a>

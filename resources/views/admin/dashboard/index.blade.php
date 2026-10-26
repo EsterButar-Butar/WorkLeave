@@ -221,6 +221,10 @@
             });
         });
     </script>
+
+    <!-- MODAL DETAIL KARTU STATISTIK ADMIN -->
+    @include('admin.dashboard.card-detail-modal')
+
     <!-- TOAST NOTIFICATION CONTAINER -->
     <div id="toastContainer" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] flex flex-col gap-3 w-full max-w-2xl px-4 pointer-events-none"></div>
 

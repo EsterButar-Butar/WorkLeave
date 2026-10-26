@@ -31,6 +31,8 @@
             }
         }
     </script>
+    <!-- Alpine.js untuk Dropdown Profil & Logout -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-[#FFFFFF] text-wl-black min-h-screen flex antialiased">
 
@@ -42,18 +44,61 @@
         <main class="p-10 bg-[#FFFFFF] flex-1">
             <div class="space-y-6 max-w-7xl mx-auto bg-[#FFFFFF]">
                 
-                <!-- Header Title -->
-                <div>
-                    <h1 class="text-3xl font-bold text-[#2D2D2D] tracking-tight">Pengajuan Cuti</h1>
-                    
-                    <!-- Tab Navigation Switcher -->
-                    <div class="flex items-center gap-8 mt-4 border-b border-gray-200">
-                        <a href="{{ url('/leave/create') }}" class="pb-3 text-sm font-semibold text-[#C12132] border-b-2 border-[#C12132] transition-all">
-                            Pengajuan Cuti
-                        </a>
-                        <a href="{{ url('/leave/history') }}" class="pb-3 text-sm font-medium text-[#5D5D5D] hover:text-[#C12132] transition-all">
-                            Riwayat Cuti
-                        </a>
+                <!-- Header Title & User Profile Dropdown -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-[#2D2D2D] tracking-tight">Pengajuan Cuti</h1>
+                        
+                        <!-- Tab Navigation Switcher -->
+                        <div class="flex items-center gap-8 mt-4 border-b border-gray-200">
+                            <a href="{{ route('leave.create') }}" class="pb-3 text-sm font-semibold text-[#C12132] border-b-2 border-[#C12132] transition-all">
+                                Pengajuan Cuti
+                            </a>
+                            <a href="{{ route('leave.history') }}" class="pb-3 text-sm font-medium text-[#5D5D5D] hover:text-[#C12132] transition-all">
+                                Riwayat Cuti
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Profil Button & Logout Dropdown -->
+                    <div class="relative" x-data="{ openDropdown: false }">
+                        <button @click="openDropdown = !openDropdown" class="flex items-center gap-3 bg-white border border-gray-100 shadow-sm px-4 py-2 rounded-2xl cursor-pointer focus:outline-none hover:bg-gray-50/80 transition-all">
+                            <div class="w-9 h-9 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center text-gray-600 shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <div class="text-sm font-semibold text-[#2D2D2D] leading-tight">{{ Auth::user()->role === \App\Enums\UserRole::ADMIN ? 'Admin' : Auth::user()->name }}</div>
+                                <div class="text-xs text-[#5D5D5D] leading-tight mt-0.5">{{ Auth::user()->role === \App\Enums\UserRole::ADMIN ? 'Admin' : (Auth::user()->position ?? 'Mitra Kerja') }}</div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-2 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': openDropdown }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </button>
+
+                        <!-- Menu Dropdown Logout -->
+                        <div x-show="openDropdown" 
+                             @click.away="openDropdown = false"
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="transform opacity-100 scale-100"
+                             x-transition:leave-end="transform opacity-0 scale-95"
+                             class="absolute right-0 mt-2 w-full min-w-[160px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.1)] border border-gray-100 py-2 z-50 hidden"
+                             :class="{ 'hidden': !openDropdown }">
+                            
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-[#C12132] hover:bg-red-50/60 transition-colors cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                                    </svg>
+                                    <span>Logout</span>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
@@ -63,22 +108,28 @@
                     <div class="space-y-6">
                         <h2 class="text-xl font-bold text-[#2D2D2D]">Form Pengajuan Cuti</h2>
 
-                        <!-- Form dengan event onsubmit untuk menampilkan modal sukses prototype -->
-                        <form onsubmit="handleFormSubmit(event)" enctype="multipart/form-data" class="space-y-5">
+                        <!-- Form Pengajuan Cuti -->
+                        <form id="leaveCreateForm" onsubmit="handleFormSubmit(event)" method="POST" action="{{ route('leave.store') }}" enctype="multipart/form-data" class="space-y-5">
+                            @csrf
+
+                            <!-- Error Alert Box -->
+                            <div id="formErrorAlert" class="hidden bg-red-50 border border-red-200 text-red-700 px-5 py-3.5 rounded-2xl text-xs space-y-1">
+                            </div>
                             
                             <!-- Jenis Cuti (Custom Dropdown dengan Hover Merah) -->
                             <div class="space-y-1.5 relative" id="customSelectWrapper">
                                 <label class="block text-xs font-medium text-[#5D5D5D]">Jenis Cuti</label>
-                                
-                                <!-- Hidden input untuk menyimpan nilai & kalkulasi JS -->
+
+                                <!-- Hidden input untuk menyimpan nilai & kalkulasi JS (kosong pada awalnya) -->
                                 <input type="hidden" id="leave_type_select" name="leave_type" value="">
+                                <input type="hidden" id="leave_type_id_input" name="leave_type_id" value="">
 
                                 <!-- Tombol Trigger Dropdown -->
                                 <button type="button" 
                                         id="customSelectBtn" 
                                         onclick="toggleLeaveDropdown()" 
-                                        class="w-full bg-white text-left text-[#2D2D2D] px-4 py-3.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#FA232B] text-sm shadow-xs flex items-center justify-between cursor-pointer transition-all">
-                                    <span id="customSelectLabel" class="text-gray-400">Pilih Jenis Cuti</span>
+                                        class="w-full bg-white text-left px-4 py-3.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#FA232B] text-sm shadow-xs flex items-center justify-between cursor-pointer transition-all">
+                                    <span id="customSelectLabel" class="text-gray-400 font-normal">Pilih jenis cuti</span>
                                     <svg id="customSelectChevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                     </svg>
@@ -86,27 +137,37 @@
 
                                 <!-- Menu Pilihan dengan Warna Hover Merah Brand WorkLeave -->
                                 <div id="customSelectMenu" class="hidden absolute top-full left-0 right-0 mt-1.5 bg-white rounded-2xl border border-gray-100 shadow-[0_12px_32px_rgba(0,0,0,0.12)] overflow-hidden py-1 z-30 transition-all">
-                                    <div onclick="selectLeaveOption('ANNUAL', 'Cuti Tahunan')" 
-                                         class="px-4 py-3 text-sm text-[#2D2D2D] hover:bg-[#C12132] hover:text-white cursor-pointer transition-colors flex items-center justify-between group">
-                                        <span class="font-medium">Cuti Tahunan</span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                        </svg>
-                                    </div>
-                                    <div onclick="selectLeaveOption('MATERNITY', 'Cuti Bersalin')" 
-                                         class="px-4 py-3 text-sm text-[#2D2D2D] hover:bg-[#C12132] hover:text-white cursor-pointer transition-colors flex items-center justify-between group border-t border-gray-50">
-                                        <span class="font-medium">Cuti Bersalin</span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                        </svg>
-                                    </div>
-                                    <div onclick="selectLeaveOption('SICK', 'Cuti Sakit')" 
-                                         class="px-4 py-3 text-sm text-[#2D2D2D] hover:bg-[#C12132] hover:text-white cursor-pointer transition-colors flex items-center justify-between group border-t border-gray-50">
-                                        <span class="font-medium">Cuti Sakit</span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                        </svg>
-                                    </div>
+                                    @forelse ($leaveTypes ?? [] as $lt)
+                                        <div onclick="selectLeaveOption('{{ $lt->code }}', '{{ $lt->id }}', '{{ $lt->name }}')" 
+                                             class="px-4 py-3 text-sm text-[#2D2D2D] hover:bg-[#C12132] hover:text-white cursor-pointer transition-colors flex items-center justify-between group border-t border-gray-50 first:border-t-0">
+                                            <span class="font-medium">{{ $lt->name }}</span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                            </svg>
+                                        </div>
+                                    @empty
+                                        <div onclick="selectLeaveOption('ANNUAL', '1', 'Cuti Tahunan')" 
+                                             class="px-4 py-3 text-sm text-[#2D2D2D] hover:bg-[#C12132] hover:text-white cursor-pointer transition-colors flex items-center justify-between group">
+                                            <span class="font-medium">Cuti Tahunan</span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                            </svg>
+                                        </div>
+                                        <div onclick="selectLeaveOption('MATERNITY', '2', 'Cuti Bersalin')" 
+                                             class="px-4 py-3 text-sm text-[#2D2D2D] hover:bg-[#C12132] hover:text-white cursor-pointer transition-colors flex items-center justify-between group border-t border-gray-50">
+                                            <span class="font-medium">Cuti Bersalin</span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                            </svg>
+                                        </div>
+                                        <div onclick="selectLeaveOption('SICK', '3', 'Cuti Sakit')" 
+                                             class="px-4 py-3 text-sm text-[#2D2D2D] hover:bg-[#C12132] hover:text-white cursor-pointer transition-colors flex items-center justify-between group border-t border-gray-50">
+                                            <span class="font-medium">Cuti Sakit</span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                            </svg>
+                                        </div>
+                                    @endforelse
                                 </div>
                             </div>
 
@@ -220,33 +281,17 @@
                                     <!-- Tanggal merah yang dilewati -->
                                 </div>
 
-                                <!-- VISUALISASI WARNA TANGGAL, WEEKEND & LIBUR NASIONAL -->
-                                <div id="liveCalcDayGridSection" class="pt-3 border-t border-gray-100 space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-xs font-semibold text-[#2D2D2D]">Status & Warna Tanggal Terpilih:</span>
-                                        <!-- Mini Legenda -->
-                                        <div class="flex items-center gap-2 text-[10px] text-gray-500">
-                                            <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Kerja</span>
-                                            <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Sabtu</span>
-                                            <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500"></span>Minggu</span>
-                                            <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#C12132]"></span>Libur Nasional</span>
-                                        </div>
-                                    </div>
-                                    <div id="liveCalcDaysGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-56 overflow-y-auto pr-1">
-                                        <!-- Diisi otomatis lewat JavaScript -->
-                                    </div>
-                                </div>
                             </div>
 
                             <!-- Keterangan -->
                             <div class="space-y-1.5">
-                                <label class="block text-xs font-medium text-[#5D5D5D]">Keterangan</label>
-                                <input type="text" placeholder="Masukkan keterangan cuti" class="w-full bg-white text-[#2D2D2D] px-4 py-3.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#FA232B] placeholder:text-gray-400 text-sm shadow-xs">
+                                <label class="block text-xs font-medium text-[#5D5D5D]">Keterangan / Alasan Cuti</label>
+                                <input type="text" name="reason" id="reason_input" required placeholder="Masukkan keterangan cuti" class="w-full bg-white text-[#2D2D2D] px-4 py-3.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#FA232B] placeholder:text-gray-400 text-sm shadow-xs">
                             </div>
 
                             <!-- Upload File Pendukung -->
                             <div class="space-y-1.5">
-                                <label class="block text-xs font-medium text-[#5D5D5D]">Upload File Pendukung</label>
+                                <label class="block text-xs font-medium text-[#5D5D5D]">Upload File Pendukung (Opsional)</label>
                                 <div onclick="openUploadModal()" class="w-full bg-white text-[#2D2D2D] px-4 py-3.5 rounded-xl border border-gray-200 flex items-center justify-between cursor-pointer hover:border-gray-300 transition-all shadow-xs">
                                     <div class="flex items-center gap-3 text-sm text-gray-400">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -255,13 +300,13 @@
                                         <span id="uploadedFileName" class="text-xs text-gray-400">Upload file</span>
                                     </div>
                                 </div>
-                                <input type="file" id="realFileInput" name="file_pendukung" class="hidden" onchange="handleFileSelected(this)">
+                                <input type="file" id="realFileInput" name="attachment" class="hidden" onchange="handleFileSelected(this)">
                             </div>
 
                             <!-- Button Submit -->
                             <div class="pt-3">
-                                <button type="submit" class="w-full bg-[#C12132] hover:bg-[#9B0010] text-white font-medium py-4 rounded-xl shadow-[0_8px_25px_rgba(193,33,50,0.25)] transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
-                                    <span>Ajukan</span>
+                                <button type="submit" id="submitLeaveBtn" class="w-full bg-[#C12132] hover:bg-[#9B0010] text-white font-medium py-4 rounded-xl shadow-[0_8px_25px_rgba(193,33,50,0.25)] transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
+                                    <span>Ajukan Cuti</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
                                     </svg>
@@ -387,19 +432,110 @@
             }
         }
 
-        // Fungsi saat tombol Ajukan diklik (mencegah submit asli, memunculkan modal sukses)
-        function handleFormSubmit(event) {
+        function showFormError(msg) {
+            const errorAlert = document.getElementById('formErrorAlert');
+            if (errorAlert) {
+                errorAlert.innerHTML = `
+                    <div class="flex items-center gap-2 font-semibold text-red-700">
+                        <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>${msg}</span>
+                    </div>
+                `;
+                errorAlert.classList.remove('hidden');
+                errorAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                alert(msg);
+            }
+        }
+
+        // Fungsi saat tombol Ajukan diklik (kirimkan data ke backend)
+        async function handleFormSubmit(event) {
             event.preventDefault();
-            successModal.classList.remove('hidden');
-            setTimeout(() => {
-                successModalContainer.classList.remove('scale-95');
-                successModalContainer.classList.add('scale-100');
-            }, 10);
+            const form = document.getElementById('leaveCreateForm') || event.target;
+            const submitBtn = document.getElementById('submitLeaveBtn');
+            const originalBtnHtml = submitBtn ? submitBtn.innerHTML : 'Ajukan Cuti';
+
+            const leaveType = document.getElementById('leave_type_select').value;
+            const startDate = document.getElementById('start_date_input').value;
+            const endDate = document.getElementById('end_date_input').value;
+            const reasonInput = document.getElementById('reason_input');
+            const reason = reasonInput ? reasonInput.value.trim() : '';
+
+            const errorAlert = document.getElementById('formErrorAlert');
+            if (errorAlert) errorAlert.classList.add('hidden');
+
+            if (!leaveType) {
+                showFormError('Pilih jenis cuti terlebih dahulu.');
+                return;
+            }
+            if (!startDate) {
+                showFormError('Pilih tanggal mulai cuti.');
+                return;
+            }
+            if (!endDate) {
+                showFormError('Pilih tanggal selesai cuti.');
+                return;
+            }
+            if (!reason || reason.length < 5) {
+                showFormError('Keterangan / alasan pengajuan cuti wajib diisi minimal 5 karakter.');
+                if (reasonInput) reasonInput.focus();
+                return;
+            }
+
+            // Pasang mode loading pada tombol submit
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                submitBtn.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <span>Mengirim Pengajuan Cuti...</span>
+                `;
+            }
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch("{{ route('leave.store') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    successModal.classList.remove('hidden');
+                    setTimeout(() => {
+                        successModalContainer.classList.remove('scale-95');
+                        successModalContainer.classList.add('scale-100');
+                    }, 10);
+                } else {
+                    const errorMsg = result.message || (result.errors ? Object.values(result.errors).flat().join('<br>') : 'Terjadi kendala saat memproses pengajuan cuti.');
+                    showFormError(errorMsg);
+                }
+            } catch (err) {
+                console.error('Submit error:', err);
+                showFormError('Gagal menghubungi server. Periksa koneksi internet Anda dan coba lagi.');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
+            }
         }
 
         // Fungsi tombol Tutup / Close pada modal sukses (mengarahkan ke halaman riwayat cuti)
         function redirectToHistory() {
-            window.location.href = "{{ url('/leave/history') }}";
+            window.location.href = "{{ route('leave.history') }}";
         }
 
         // Kalkulasi real-time pemotongan hari kerja & tanggal merah nasional
@@ -602,14 +738,28 @@
             if (btn) btn.classList.remove('ring-1', 'ring-[#FA232B]', 'border-[#FA232B]');
         }
 
-        function selectLeaveOption(code, label) {
+        function selectLeaveOption(code, idOrLabel, maybeLabel) {
+            let id = null;
+            let label = idOrLabel;
+            if (maybeLabel !== undefined) {
+                id = idOrLabel;
+                label = maybeLabel;
+            }
+
             const hiddenInput = document.getElementById('leave_type_select');
+            const idInput = document.getElementById('leave_type_id_input');
             const labelSpan = document.getElementById('customSelectLabel');
 
-            hiddenInput.value = code;
-            labelSpan.innerText = label;
-            labelSpan.classList.remove('text-gray-400');
-            labelSpan.classList.add('text-[#2D2D2D]', 'font-semibold');
+            if (hiddenInput) hiddenInput.value = code || '';
+            if (idInput && id) idInput.value = id || '';
+            if (labelSpan) {
+                labelSpan.innerText = label;
+                if (!code) {
+                    labelSpan.className = 'text-gray-400 font-normal';
+                } else {
+                    labelSpan.className = 'text-[#2D2D2D] font-semibold';
+                }
+            }
 
             closeLeaveDropdown();
             calculateLiveLeave();

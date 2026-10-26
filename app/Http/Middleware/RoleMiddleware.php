@@ -25,7 +25,13 @@ class RoleMiddleware
         $userRoleValue = is_string($user->role) ? $user->role : $user->role->value;
 
         if (!in_array($userRoleValue, $roles, true)) {
-            abort(403, 'Akses ditolak: Anda tidak memiliki izin untuk mengakses halaman ini.');
+            // Jika admin mencoba mengakses halaman mitra, alihkan langsung ke Dashboard Admin
+            if ($user->isAdmin()) {
+                return redirect()->route('admin.dashboard');
+            }
+
+            // Jika mitra mencoba mengakses halaman admin, kembalikan ke dashboard mitra
+            return redirect()->route('dashboard')->with('error', 'Akses ditolak: Anda tidak memiliki izin untuk halaman tersebut.');
         }
 
         return $next($request);

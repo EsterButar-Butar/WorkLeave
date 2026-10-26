@@ -9,7 +9,11 @@ use App\Models\LeaveType;
 use App\Services\LeaveRequestService;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class LeaveRequestController extends Controller
 {
@@ -76,9 +80,46 @@ class LeaveRequestController extends Controller
         ]);
     }
 
-    // Simpan data pengajuan cuti baru dari mitra
-    public function store(StoreLeaveRequest $request): JsonResponse
+    // Tampilkan formulir pengajuan cuti baru
+    public function create(Request $request): View|RedirectResponse
     {
+        if ($request->user() && $request->user()->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if (LeaveType::count() === 0) {
+            (new \Database\Seeders\LeaveTypeSeeder())->run();
+        }
+        $leaveTypes = LeaveType::all();
+        return view('user.leave.create', compact('leaveTypes'));
+    }
+
+    // Tampilkan daftar riwayat pengajuan cuti mitra yang sedang login
+    public function history(Request $request): View|RedirectResponse
+    {
+        if ($request->user() && $request->user()->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        $user = $request->user();
+        $leaveRequests = LeaveRequest::with(['leaveType', 'approver'])
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
+
+        return view('user.leave.history', compact('leaveRequests'));
+    }
+
+    // Simpan data pengajuan cuti baru dari mitra
+    public function store(StoreLeaveRequest $request): JsonResponse|RedirectResponse
+    {
+        if ($request->user() && $request->user()->isAdmin()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Administrator tidak dapat mengajukan cuti.',
+            ], 403);
+        }
+
         try {
             // Validasi input data dari form
             $data = $request->validated();
@@ -93,18 +134,45 @@ class LeaveRequestController extends Controller
             $leaveRequest = $this->leaveRequestService->createRequest($request->user(), $data);
             $leaveRequest->load('leaveType');
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Pengajuan cuti berhasil diajukan dan sedang menunggu persetujuan.',
-                'data' => $leaveRequest,
-            ], 201);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Pengajuan cuti berhasil diajukan dan sedang menunggu persetujuan.',
+                    'data' => $leaveRequest,
+                ], 201);
+            }
+
+            return redirect()->route('leave.history')->with('success', 'Pengajuan cuti berhasil diajukan dan sedang menunggu persetujuan.');
         } catch (Exception $e) {
-            // Kembalikan pesan error jika kuota tidak cukup atau tanggal tidak valid
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ], 422);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+
+            return back()->withErrors(['leave_error' => $e->getMessage()])->withInput();
         }
+    }
+
+    // Unduh berkas lampiran pengajuan cuti
+    public function downloadAttachment(Request $request, LeaveRequest $leaveRequest): BinaryFileResponse|JsonResponse
+    {
+        $user = $request->user();
+
+        // Hanya pemilik atau admin yang berhak mengunduh
+        if (!$user->isAdmin() && $leaveRequest->user_id !== $user->id) {
+            abort(403, 'Akses ditolak: Anda tidak memiliki izin untuk mengunduh dokumen ini.');
+        }
+
+        if (!$leaveRequest->attachment_path || !Storage::disk('public')->exists($leaveRequest->attachment_path)) {
+            abort(404, 'File lampiran tidak ditemukan di penyimpanan server.');
+        }
+
+        return response()->download(
+            Storage::disk('public')->path($leaveRequest->attachment_path),
+            basename($leaveRequest->attachment_path)
+        );
     }
 
     // Tampilkan detail satu permohonan cuti beserta log riwayat keputusannya

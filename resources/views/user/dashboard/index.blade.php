@@ -49,7 +49,7 @@
                     <div>
                         <p class="text-sm text-[#5D5D5D] font-medium">Selamat datang,</p>
                         <h1 class="text-3xl lg:text-4xl font-bold text-[#2D2D2D] tracking-tight mt-1">
-                            Najmiyatul
+                            {{ Auth::user()->role === \App\Enums\UserRole::ADMIN ? 'Admin' : Auth::user()->name }}
                         </h1>
                         <p class="text-sm text-[#5D5D5D] mt-1.5">Pantau pengajuan cuti anda disini</p>
                     </div>
@@ -79,8 +79,8 @@
                                     </svg>
                                 </div>
                                 <div class="text-left">
-                                    <div class="text-sm font-semibold text-[#2D2D2D] leading-tight">Najmiyatul</div>
-                                    <div class="text-xs text-[#5D5D5D] leading-tight mt-0.5">Mitra Kerja</div>
+                                    <div class="text-sm font-semibold text-[#2D2D2D] leading-tight">{{ Auth::user()->role === \App\Enums\UserRole::ADMIN ? 'Admin' : Auth::user()->name }}</div>
+                                    <div class="text-xs text-[#5D5D5D] leading-tight mt-0.5">{{ Auth::user()->role === \App\Enums\UserRole::ADMIN ? 'Admin' : (Auth::user()->position ?? 'Mitra Kerja') }}</div>
                                 </div>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-2 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': openDropdown }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />

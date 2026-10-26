@@ -8,8 +8,12 @@
         </div>
         <div>
             <span class="text-xs font-medium text-[#5D5D5D] block">Sisa cuti tahunan</span>
-            <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">8 hari</span>
-            <span class="text-[11px] text-[#8C8C8C] block mt-0.5">Dari 12 hari</span>
+            <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">
+                {{ $balances['ANNUAL']->remaining_quota ?? 12 }} hari
+            </span>
+            <span class="text-[11px] text-[#8C8C8C] block mt-0.5">
+                Dari {{ $balances['ANNUAL']->initial_quota ?? 12 }} hari
+            </span>
         </div>
     </div>
 
@@ -22,8 +26,12 @@
         </div>
         <div>
             <span class="text-xs font-medium text-[#5D5D5D] block">Sisa cuti sakit</span>
-            <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">5 hari</span>
-            <span class="text-[11px] text-[#8C8C8C] block mt-0.5">Dari 7 hari</span>
+            <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">
+                {{ $balances['SICK']->remaining_quota ?? 7 }} hari
+            </span>
+            <span class="text-[11px] text-[#8C8C8C] block mt-0.5">
+                Dari {{ $balances['SICK']->initial_quota ?? 7 }} hari
+            </span>
         </div>
     </div>
 
@@ -36,8 +44,12 @@
         </div>
         <div>
             <span class="text-xs font-medium text-[#5D5D5D] block">Sisa cuti bersalin</span>
-            <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">90 hari</span>
-            <span class="text-[11px] text-[#8C8C8C] block mt-0.5">Dari 90 hari</span>
+            <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">
+                {{ $balances['MATERNITY']->remaining_quota ?? 90 }} hari
+            </span>
+            <span class="text-[11px] text-[#8C8C8C] block mt-0.5">
+                Dari {{ $balances['MATERNITY']->initial_quota ?? 90 }} hari
+            </span>
         </div>
     </div>
 
@@ -50,8 +62,10 @@
         </div>
         <div>
             <span class="text-xs font-medium text-[#5D5D5D] block">Pengajuan Aktif</span>
-            <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">1</span>
-            <span class="text-[11px] text-[#8C8C8C] block mt-0.5">Menunggu pengajuan</span>
+            <span class="text-2xl font-bold text-[#2D2D2D] leading-tight block mt-0.5">
+                {{ $pendingCount ?? 0 }}
+            </span>
+            <span class="text-[11px] text-[#8C8C8C] block mt-0.5">Menunggu persetujuan</span>
         </div>
     </div>
 </div>

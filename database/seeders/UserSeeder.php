@@ -18,15 +18,16 @@ class UserSeeder extends Seeder
         User::firstOrCreate(
             ['email' => 'admin@workleave.test'],
             [
-                'name' => 'HR Administrator',
+                'name' => 'Admin',
                 'password' => Hash::make('password'),
                 'role' => UserRole::ADMIN,
                 'nip' => 'ADM-001',
                 'phone' => '081234567890',
                 'department' => 'Human Capital',
-                'position' => 'HR Manager',
+                'position' => 'Admin',
                 'join_date' => '2022-01-01',
                 'is_active' => true,
+                'email_verified_at' => now(),
             ]
         );
 
@@ -43,6 +44,7 @@ class UserSeeder extends Seeder
                 'position' => 'Senior Frontend Developer',
                 'join_date' => '2024-01-15',
                 'is_active' => true,
+                'email_verified_at' => now(),
             ]
         );
 
@@ -59,6 +61,7 @@ class UserSeeder extends Seeder
                 'position' => 'Content Specialist',
                 'join_date' => '2024-03-01',
                 'is_active' => true,
+                'email_verified_at' => now(),
             ]
         );
 
@@ -75,6 +78,7 @@ class UserSeeder extends Seeder
                 'position' => 'UI/UX Designer',
                 'join_date' => '2024-06-10',
                 'is_active' => true,
+                'email_verified_at' => now(),
             ]
         );
     }

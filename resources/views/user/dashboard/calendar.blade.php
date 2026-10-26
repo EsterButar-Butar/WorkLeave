@@ -34,19 +34,19 @@
     <!-- LEGENDA WARNA TANGGAL -->
     <div class="pt-2 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#5D5D5D]">
         <div class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-md bg-[#FDE8EC] border border-red-200 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-[#C12132] inline-block"></span>
             <span>Libur Nasional</span>
         </div>
         <div class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-md bg-amber-50 border border-amber-200 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
             <span>Sabtu</span>
         </div>
         <div class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-md bg-rose-50 border border-rose-200 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
             <span>Minggu</span>
         </div>
         <div class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-md bg-blue-50 border border-blue-500 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span>
             <span>Hari Ini</span>
         </div>
     </div>
@@ -219,7 +219,7 @@
             for (let i = startDay - 1; i >= 0; i--) {
                 const dayNum = prevTotalDays - i;
                 const cell = document.createElement('div');
-                cell.className = 'h-16 p-1.5 border-r border-b border-gray-100 text-gray-300 bg-gray-50/40';
+                cell.className = 'h-12 border-r border-b border-gray-100 flex items-center justify-center text-gray-300 text-xs bg-gray-50/20 select-none';
                 cell.textContent = dayNum;
                 gridEl.appendChild(cell);
                 cellCount++;
@@ -241,55 +241,46 @@
 
                 const isSunday = (dayOfWeek === 0);
                 const isSaturday = (dayOfWeek === 6);
-                const isWeekend = isSunday || isSaturday;
                 const isToday = isTodayThisMonth && d === today.getDate();
 
-                let cellClass = 'h-16 p-1.5 border-r border-b border-gray-100 flex flex-col justify-between transition-colors relative group ';
+                let cellClass = 'h-12 border-r border-b border-gray-100 flex flex-col items-center justify-center transition-colors relative cursor-default ';
 
-                // Logika Pewarnaan Tanggal
+                // Background Cell yang Halus dan Rapi
                 if (isHoliday) {
-                    // Merah Libur Nasional
-                    cellClass += 'bg-[#FDE8EC] text-[#C12132] font-bold border-red-200 ';
+                    cellClass += 'bg-[#FFF5F6] text-[#C12132] hover:bg-red-100/60 ';
                 } else if (isToday) {
-                    // Highlight Hari Ini (Warna Biru)
-                    cellClass += 'bg-blue-50/70 text-blue-600 font-bold ring-2 ring-blue-500 ring-inset ';
+                    cellClass += 'bg-blue-50/40 text-blue-600 hover:bg-blue-100/50 ';
                 } else if (isSunday) {
-                    // Minggu: Merah Muda
-                    cellClass += 'bg-rose-50/50 text-rose-600 font-semibold ';
+                    cellClass += 'bg-rose-50/20 text-rose-600 hover:bg-rose-50/60 ';
                 } else if (isSaturday) {
-                    // Sabtu: Oranye/Kuning Muda
-                    cellClass += 'bg-amber-50/40 text-amber-600 font-semibold ';
+                    cellClass += 'bg-amber-50/20 text-amber-600 hover:bg-amber-50/60 ';
                 } else {
-                    // Hari Kerja Biasa
                     cellClass += 'text-[#2D2D2D] hover:bg-gray-50 ';
                 }
 
                 cell.className = cellClass;
                 cell.setAttribute('title', isHoliday ? `Libur Nasional: ${holidayName}` : (isToday ? 'Hari Ini' : (isSunday ? 'Hari Minggu' : (isSaturday ? 'Hari Sabtu' : 'Hari Kerja'))));
 
-                // Isi Cell
-                let innerContent = `
-                    <div class="flex items-center justify-between">
-                        <span class="${isHoliday ? 'text-xs font-bold' : ''}">${d}</span>
-                        ${isHoliday ? '<span class="w-1.5 h-1.5 rounded-full bg-[#C12132] shrink-0"></span>' : ''}
-                    </div>
-                `;
-
-                if (isHoliday) {
-                    innerContent += `
-                        <span class="text-[9px] leading-tight text-[#C12132] truncate font-semibold block mt-auto" title="${holidayName}">
-                            ${holidayName}
+                // Isi Cell (Simetris & Rapi Tanpa Teks Panjang)
+                if (isToday) {
+                    cell.innerHTML = `
+                        <span class="w-7 h-7 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+                            ${d}
                         </span>
                     `;
-                } else if (isToday) {
-                    innerContent += `
-                        <span class="text-[9px] leading-tight text-blue-600 font-semibold block mt-auto">
-                            Hari Ini
-                        </span>
+                } else if (isHoliday) {
+                    cell.innerHTML = `
+                        <span class="text-xs font-bold text-[#C12132] leading-none">${d}</span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#C12132] mt-1 shrink-0" title="${holidayName}"></span>
                     `;
+                } else if (isSunday) {
+                    cell.innerHTML = `<span class="text-xs font-semibold text-rose-600 leading-none">${d}</span>`;
+                } else if (isSaturday) {
+                    cell.innerHTML = `<span class="text-xs font-semibold text-amber-600 leading-none">${d}</span>`;
+                } else {
+                    cell.innerHTML = `<span class="text-xs font-medium text-[#2D2D2D] leading-none">${d}</span>`;
                 }
 
-                cell.innerHTML = innerContent;
                 gridEl.appendChild(cell);
                 cellCount++;
             }
@@ -298,7 +289,7 @@
             let remainingCells = (cellCount % 7 === 0) ? 0 : (7 - (cellCount % 7));
             for (let n = 1; n <= remainingCells; n++) {
                 const cell = document.createElement('div');
-                cell.className = 'h-16 p-1.5 border-r border-b border-gray-100 text-gray-300 bg-gray-50/40';
+                cell.className = 'h-12 border-r border-b border-gray-100 flex items-center justify-center text-gray-300 text-xs bg-gray-50/20 select-none';
                 cell.textContent = n;
                 gridEl.appendChild(cell);
             }

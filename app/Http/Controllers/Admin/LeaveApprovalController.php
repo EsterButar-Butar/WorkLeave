@@ -44,28 +44,36 @@ class LeaveApprovalController extends Controller
     }
 
     // Setujui permohonan cuti mitra oleh admin
-    public function approve(Request $request, LeaveRequest $leaveRequest): JsonResponse
+    public function approve(Request $request, LeaveRequest $leaveRequest): JsonResponse|\Illuminate\Http\RedirectResponse
     {
         try {
             $note = $request->input('note');
             // Panggil service untuk setujui cuti dan potong saldo kuota mitra
             $updated = $this->leaveRequestService->approveRequest($leaveRequest, $request->user(), $note);
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Pengajuan cuti mitra kerja berhasil disetujui.',
-                'data' => $updated,
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Pengajuan cuti mitra kerja berhasil disetujui.',
+                    'data' => $updated,
+                ]);
+            }
+
+            return back()->with('success', 'Pengajuan cuti mitra kerja berhasil disetujui.');
         } catch (Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ], 422);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+
+            return back()->withErrors(['approval_error' => $e->getMessage()]);
         }
     }
 
     // Tolak permohonan cuti mitra oleh admin beserta catatan alasannya
-    public function reject(Request $request, LeaveRequest $leaveRequest): JsonResponse
+    public function reject(Request $request, LeaveRequest $leaveRequest): JsonResponse|\Illuminate\Http\RedirectResponse
     {
         // Validasi wajib menyertakan alasan penolakan
         $request->validate([
@@ -79,16 +87,24 @@ class LeaveApprovalController extends Controller
             // Panggil service untuk tandai rejected dan simpan riwayat log
             $updated = $this->leaveRequestService->rejectRequest($leaveRequest, $request->user(), $reason);
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Pengajuan cuti telah ditolak.',
-                'data' => $updated,
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Pengajuan cuti telah ditolak.',
+                    'data' => $updated,
+                ]);
+            }
+
+            return back()->with('success', 'Pengajuan cuti telah ditolak.');
         } catch (Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ], 422);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+
+            return back()->withErrors(['approval_error' => $e->getMessage()]);
         }
     }
 }

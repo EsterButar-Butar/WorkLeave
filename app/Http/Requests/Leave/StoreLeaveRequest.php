@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Leave;
 
+use App\Models\LeaveType;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreLeaveRequest extends FormRequest
@@ -9,6 +10,62 @@ class StoreLeaveRequest extends FormRequest
     public function authorize(): bool
     {
         return $this->user() !== null;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        // Pastikan tabel master leave_types tidak kosong
+        if (LeaveType::count() === 0) {
+            (new \Database\Seeders\LeaveTypeSeeder())->run();
+        }
+
+        $rawInput = $this->input('leave_type_id') 
+            ?? $this->input('leave_type') 
+            ?? $this->input('leave_type_code');
+
+        $type = null;
+
+        if ($rawInput) {
+            // 1. Cek apakah ID numerik yang valid di database
+            if (is_numeric($rawInput)) {
+                $type = LeaveType::find((int) $rawInput);
+            }
+
+            // 2. Cek berdasarkan kode (ANNUAL, SICK, MATERNITY)
+            if (!$type) {
+                $type = LeaveType::where('code', strtoupper(trim($rawInput)))->first();
+            }
+
+            // 3. Cek berdasarkan nama cuti (misal: "Cuti Tahunan")
+            if (!$type) {
+                $type = LeaveType::where('name', 'like', '%' . trim($rawInput) . '%')->first();
+            }
+
+            // 4. Deteksi kata kunci umum jika format string bebas
+            if (!$type) {
+                $lower = strtolower($rawInput);
+                if (str_contains($lower, 'tahun') || str_contains($lower, 'annual')) {
+                    $type = LeaveType::where('code', 'ANNUAL')->first();
+                } elseif (str_contains($lower, 'salin') || str_contains($lower, 'matern')) {
+                    $type = LeaveType::where('code', 'MATERNITY')->first();
+                } elseif (str_contains($lower, 'sakit') || str_contains($lower, 'sick')) {
+                    $type = LeaveType::where('code', 'SICK')->first();
+                }
+            }
+        }
+
+        if ($type) {
+            $this->merge([
+                'leave_type_id' => $type->id,
+                'leave_type' => $type->code,
+                'leave_type_code' => $type->code,
+            ]);
+        }
+
+        // Dukung nama field upload file_pendukung dari form prototype
+        if (!$this->hasFile('attachment') && $this->hasFile('file_pendukung')) {
+            $this->files->set('attachment', $this->file('file_pendukung'));
+        }
     }
 
     public function rules(): array

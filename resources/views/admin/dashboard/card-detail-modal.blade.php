@@ -107,7 +107,6 @@
             }
         }
         
-        // Lengkapi agar genap 12 sesuai desain Figma
         $demoEmployees = [
             ['name' => 'Budi Santoso', 'nip' => 'MTR-2024-001', 'department' => 'Technology & IT', 'position' => 'Senior Frontend Developer', 'email' => 'budi@workleave.test', 'phone' => '081298765432', 'date' => '15 Jan 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
             ['name' => 'Siti Rahmawati', 'nip' => 'MTR-2024-002', 'department' => 'Digital Marketing', 'position' => 'Content Specialist', 'email' => 'siti@workleave.test', 'phone' => '081345678901', 'date' => '01 Mar 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
@@ -123,7 +122,6 @@
             ['name' => 'Maya Anggraini', 'nip' => 'MTR-2024-012', 'department' => 'Digital Marketing', 'position' => 'SEO & SEM Specialist', 'email' => 'maya@workleave.test', 'phone' => '082445678901', 'date' => '25 Sep 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
         ];
 
-        // Gabungkan tanpa duplikasi email
         $existingEmails = array_column($employeeList, 'email');
         foreach ($demoEmployees as $d) {
             if (!in_array($d['email'], $existingEmails)) {
@@ -131,39 +129,127 @@
             }
         }
 
-        // 2. Data Cuti Disetujui (9)
-        $approvedList = [
-            ['name' => 'Budi Santoso', 'nip' => 'MTR-2024-001', 'department' => 'Technology & IT', 'type' => 'Cuti Tahunan', 'period' => '11/10/2026 – 13/10/2026', 'duration' => '3 Hari', 'desc' => 'Keperluan keluarga di luar kota', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Dimas Prasetyo', 'nip' => 'MTR-2024-003', 'department' => 'Product & Design', 'type' => 'Cuti Sakit', 'period' => '17/10/2026 – 18/10/2026', 'duration' => '2 Hari', 'desc' => 'Demam dan flu berat, istirahat atas saran dokter', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Titi Handayani', 'nip' => 'MTR-2024-010', 'department' => 'Product & Design', 'type' => 'Cuti Tahunan', 'period' => '11/10/2026 – 13/10/2026', 'duration' => '3 Hari', 'desc' => 'Acara keluarga besar di kampung halaman', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Putri Wulandari', 'nip' => 'MTR-2024-005', 'department' => 'Finance & Accounting', 'type' => 'Cuti Tahunan', 'period' => '11/10/2026 – 13/10/2026', 'duration' => '3 Hari', 'desc' => 'Keperluan wisuda adik kandung', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Ayu Pratiwi', 'nip' => 'MTR-2024-004', 'department' => 'Human Resources', 'type' => 'Cuti Sakit', 'period' => '05/10/2026 – 07/10/2026', 'duration' => '3 Hari', 'desc' => 'Pemeriksaan kesehatan rawat jalan', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Yanto Nugroho', 'nip' => 'MTR-2024-006', 'department' => 'Technology & IT', 'type' => 'Cuti Tahunan', 'period' => '02/10/2026 – 04/10/2026', 'duration' => '3 Hari', 'desc' => 'Renovasi rumah tempat tinggal', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Yanti Kusuma', 'nip' => 'MTR-2024-007', 'department' => 'Customer Success', 'type' => 'Cuti Menikah', 'period' => '08/10/2026 – 10/10/2026', 'duration' => '3 Hari', 'desc' => 'Pernikahan kerabat inti', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Putra Pratama', 'nip' => 'MTR-2024-008', 'department' => 'Technology & IT', 'type' => 'Cuti Tahunan', 'period' => '14/10/2026 – 15/10/2026', 'duration' => '2 Hari', 'desc' => 'Urusan sertifikasi keahlian', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Dani Firmansyah', 'nip' => 'MTR-2024-009', 'department' => 'Sales & Business', 'type' => 'Cuti Tahunan', 'period' => '18/10/2026 – 19/10/2026', 'duration' => '2 Hari', 'desc' => 'Keperluan perpanjangan SIM dan paspor', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
+        // 2. Data Cuti Disetujui
+        $approvedList = [];
+        if (isset($dbApproved) && $dbApproved->count() > 0) {
+            foreach ($dbApproved as $req) {
+                if ($req->user) {
+                    $startFmt = \Carbon\Carbon::parse($req->start_date)->format('d/m/Y');
+                    $endFmt = \Carbon\Carbon::parse($req->end_date)->format('d/m/Y');
+                    $approvedList[] = [
+                        'name' => $req->user->name,
+                        'nip' => $req->user->nip ?? 'MTR-' . str_pad($req->user->id, 3, '0', STR_PAD_LEFT),
+                        'department' => $req->user->department ?? 'General Operations',
+                        'position' => $req->user->position ?? 'Mitra Kerja',
+                        'type' => $req->leaveType->name ?? 'Cuti',
+                        'period' => ($startFmt === $endFmt) ? $startFmt : ($startFmt . ' – ' . $endFmt),
+                        'duration' => ($req->total_days ?? 1) . ' Hari',
+                        'desc' => $req->reason ?? '-',
+                        'status' => 'Disetujui',
+                        'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                    ];
+                }
+            }
+        }
+
+        $demoApproved = [
+            ['name' => 'Budi Santoso', 'nip' => 'MTR-2024-001', 'department' => 'Technology & IT', 'position' => 'Senior Frontend Developer', 'type' => 'Cuti Tahunan', 'period' => '11/10/2026 – 13/10/2026', 'duration' => '3 Hari', 'desc' => 'Keperluan keluarga di luar kota', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
+            ['name' => 'Dimas Prasetyo', 'nip' => 'MTR-2024-003', 'department' => 'Product & Design', 'position' => 'UI/UX Designer', 'type' => 'Cuti Sakit', 'period' => '17/10/2026 – 18/10/2026', 'duration' => '2 Hari', 'desc' => 'Demam dan flu berat, istirahat atas saran dokter', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
+            ['name' => 'Titi Handayani', 'nip' => 'MTR-2024-010', 'department' => 'Product & Design', 'position' => 'Product Manager', 'type' => 'Cuti Tahunan', 'period' => '11/10/2026 – 13/10/2026', 'duration' => '3 Hari', 'desc' => 'Acara keluarga besar di kampung halaman', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
+            ['name' => 'Putri Wulandari', 'nip' => 'MTR-2024-005', 'department' => 'Finance & Accounting', 'position' => 'Finance Staff', 'type' => 'Cuti Tahunan', 'period' => '11/10/2026 – 13/10/2026', 'duration' => '3 Hari', 'desc' => 'Keperluan wisuda adik kandung', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
+            ['name' => 'Ayu Pratiwi', 'nip' => 'MTR-2024-004', 'department' => 'Human Resources', 'position' => 'Recruitment Officer', 'type' => 'Cuti Sakit', 'period' => '05/10/2026 – 07/10/2026', 'duration' => '3 Hari', 'desc' => 'Pemeriksaan kesehatan rawat jalan', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
+            ['name' => 'Yanto Nugroho', 'nip' => 'MTR-2024-006', 'department' => 'Technology & IT', 'position' => 'Backend Engineer', 'type' => 'Cuti Tahunan', 'period' => '02/10/2026 – 04/10/2026', 'duration' => '3 Hari', 'desc' => 'Renovasi rumah tempat tinggal', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
+            ['name' => 'Yanti Kusuma', 'nip' => 'MTR-2024-007', 'department' => 'Customer Success', 'position' => 'CS Lead', 'type' => 'Cuti Menikah', 'period' => '08/10/2026 – 10/10/2026', 'duration' => '3 Hari', 'desc' => 'Pernikahan kerabat inti', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
+            ['name' => 'Putra Pratama', 'nip' => 'MTR-2024-008', 'department' => 'Technology & IT', 'position' => 'DevOps Specialist', 'type' => 'Cuti Tahunan', 'period' => '14/10/2026 – 15/10/2026', 'duration' => '2 Hari', 'desc' => 'Urusan sertifikasi keahlian', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
+            ['name' => 'Dani Firmansyah', 'nip' => 'MTR-2024-009', 'department' => 'Sales & Business', 'position' => 'Account Executive', 'type' => 'Cuti Tahunan', 'period' => '18/10/2026 – 19/10/2026', 'duration' => '2 Hari', 'desc' => 'Keperluan perpanjangan SIM dan paspor', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
         ];
 
-        // 3. Data Pengajuan Cuti Pending (11)
-        $pendingList = [
-            ['name' => 'Siti Rahmawati', 'nip' => 'MTR-2024-002', 'department' => 'Digital Marketing', 'type' => 'Cuti Tahunan', 'period' => '11/10/2026 – 13/10/2026', 'duration' => '2 Hari', 'desc' => 'Perpanjangan dokumen kependudukan dan urusan administrasi keluarga', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Budi Santoso', 'nip' => 'MTR-2024-001', 'department' => 'Technology & IT', 'type' => 'Cuti Tahunan', 'period' => '25/10/2026 – 26/10/2026', 'duration' => '2 Hari', 'desc' => 'Menghadiri reuni keluarga besar', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Maya Anggraini', 'nip' => 'MTR-2024-012', 'department' => 'Digital Marketing', 'type' => 'Cuti Tahunan', 'period' => '22/10/2026 – 24/10/2026', 'duration' => '3 Hari', 'desc' => 'Keperluan pindah rumah baru', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Rian Hidayat', 'nip' => 'MTR-2024-011', 'department' => 'Technology & IT', 'type' => 'Cuti Penting', 'period' => '23/10/2026 – 24/10/2026', 'duration' => '2 Hari', 'desc' => 'Mendampingi keluarga rawat inap', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Ayu Pratiwi', 'nip' => 'MTR-2024-004', 'department' => 'Human Resources', 'type' => 'Cuti Tahunan', 'period' => '28/10/2026 – 30/10/2026', 'duration' => '3 Hari', 'desc' => 'Libur tahunan keluarga', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Putri Wulandari', 'nip' => 'MTR-2024-005', 'department' => 'Finance & Accounting', 'type' => 'Cuti Tahunan', 'period' => '27/10/2026 – 28/10/2026', 'duration' => '2 Hari', 'desc' => 'Urusan perbankan & administrasi pajak', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Yanto Nugroho', 'nip' => 'MTR-2024-006', 'department' => 'Technology & IT', 'type' => 'Cuti Sakit', 'period' => '21/10/2026 – 22/10/2026', 'duration' => '2 Hari', 'desc' => 'Istirahat pasca tindakan dokter gigi', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Yanti Kusuma', 'nip' => 'MTR-2024-007', 'department' => 'Customer Success', 'type' => 'Cuti Tahunan', 'period' => '29/10/2026 – 31/10/2026', 'duration' => '3 Hari', 'desc' => 'Urusan keluarga di Jawa Barat', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Putra Pratama', 'nip' => 'MTR-2024-008', 'department' => 'Technology & IT', 'type' => 'Cuti Tahunan', 'period' => '24/10/2026 – 25/10/2026', 'duration' => '2 Hari', 'desc' => 'Menghadiri pernikahan sahabat karib', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Dani Firmansyah', 'nip' => 'MTR-2024-009', 'department' => 'Sales & Business', 'type' => 'Cuti Tahunan', 'period' => '26/10/2026 – 27/10/2026', 'duration' => '2 Hari', 'desc' => 'Mengantar orang tua kontrol kesehatan', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Dimas Prasetyo', 'nip' => 'MTR-2024-003', 'department' => 'Product & Design', 'type' => 'Cuti Tahunan', 'period' => '30/10/2026 – 31/10/2026', 'duration' => '2 Hari', 'desc' => 'Istirahat dan urusan perpanjangan masa sewa rumah', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
+        $approvedNames = array_map('strtolower', array_column($approvedList, 'name'));
+        foreach ($demoApproved as $da) {
+            if (!in_array(strtolower($da['name']), $approvedNames)) {
+                $approvedList[] = $da;
+            }
+        }
+
+        // 3. Data Pengajuan Cuti Pending
+        $pendingList = [];
+        if (isset($dbPending) && $dbPending->count() > 0) {
+            foreach ($dbPending as $req) {
+                if ($req->user) {
+                    $startFmt = \Carbon\Carbon::parse($req->start_date)->format('d/m/Y');
+                    $endFmt = \Carbon\Carbon::parse($req->end_date)->format('d/m/Y');
+                    $pendingList[] = [
+                        'name' => $req->user->name,
+                        'nip' => $req->user->nip ?? 'MTR-' . str_pad($req->user->id, 3, '0', STR_PAD_LEFT),
+                        'department' => $req->user->department ?? 'General Operations',
+                        'position' => $req->user->position ?? 'Mitra Kerja',
+                        'type' => $req->leaveType->name ?? 'Cuti',
+                        'period' => ($startFmt === $endFmt) ? $startFmt : ($startFmt . ' – ' . $endFmt),
+                        'duration' => ($req->total_days ?? 1) . ' Hari',
+                        'desc' => $req->reason ?? '-',
+                        'status' => 'Menunggu Keputusan',
+                        'status_color' => 'bg-amber-50 text-amber-700 border-amber-200',
+                    ];
+                }
+            }
+        }
+
+        $demoPending = [
+            ['name' => 'Siti Rahmawati', 'nip' => 'MTR-2024-002', 'department' => 'Digital Marketing', 'position' => 'Content Specialist', 'type' => 'Cuti Tahunan', 'period' => '11/10/2026 – 13/10/2026', 'duration' => '2 Hari', 'desc' => 'Perpanjangan dokumen kependudukan dan urusan administrasi keluarga', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
+            ['name' => 'Budi Santoso', 'nip' => 'MTR-2024-001', 'department' => 'Technology & IT', 'position' => 'Senior Frontend Developer', 'type' => 'Cuti Tahunan', 'period' => '25/10/2026 – 26/10/2026', 'duration' => '2 Hari', 'desc' => 'Menghadiri reuni keluarga besar', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
+            ['name' => 'Maya Anggraini', 'nip' => 'MTR-2024-012', 'department' => 'Digital Marketing', 'position' => 'SEO & SEM Specialist', 'type' => 'Cuti Tahunan', 'period' => '22/10/2026 – 24/10/2026', 'duration' => '3 Hari', 'desc' => 'Keperluan pindah rumah baru', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
+            ['name' => 'Rian Hidayat', 'nip' => 'MTR-2024-011', 'department' => 'Technology & IT', 'position' => 'Mobile Developer', 'type' => 'Cuti Penting', 'period' => '23/10/2026 – 24/10/2026', 'duration' => '2 Hari', 'desc' => 'Mendampingi keluarga rawat inap', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
+            ['name' => 'Ayu Pratiwi', 'nip' => 'MTR-2024-004', 'department' => 'Human Resources', 'position' => 'Recruitment Officer', 'type' => 'Cuti Tahunan', 'period' => '28/10/2026 – 30/10/2026', 'duration' => '3 Hari', 'desc' => 'Libur tahunan keluarga', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
+            ['name' => 'Putri Wulandari', 'nip' => 'MTR-2024-005', 'department' => 'Finance & Accounting', 'position' => 'Finance Staff', 'type' => 'Cuti Tahunan', 'period' => '27/10/2026 – 28/10/2026', 'duration' => '2 Hari', 'desc' => 'Urusan perbankan & administrasi pajak', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
+            ['name' => 'Yanto Nugroho', 'nip' => 'MTR-2024-006', 'department' => 'Technology & IT', 'position' => 'Backend Engineer', 'type' => 'Cuti Sakit', 'period' => '21/10/2026 – 22/10/2026', 'duration' => '2 Hari', 'desc' => 'Istirahat pasca tindakan dokter gigi', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
+            ['name' => 'Yanti Kusuma', 'nip' => 'MTR-2024-007', 'department' => 'Customer Success', 'position' => 'CS Lead', 'type' => 'Cuti Tahunan', 'period' => '29/10/2026 – 31/10/2026', 'duration' => '3 Hari', 'desc' => 'Urusan keluarga di Jawa Barat', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
+            ['name' => 'Putra Pratama', 'nip' => 'MTR-2024-008', 'department' => 'Technology & IT', 'position' => 'DevOps Specialist', 'type' => 'Cuti Tahunan', 'period' => '24/10/2026 – 25/10/2026', 'duration' => '2 Hari', 'desc' => 'Menghadiri pernikahan sahabat karib', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
+            ['name' => 'Dani Firmansyah', 'nip' => 'MTR-2024-009', 'department' => 'Sales & Business', 'position' => 'Account Executive', 'type' => 'Cuti Tahunan', 'period' => '26/10/2026 – 27/10/2026', 'duration' => '2 Hari', 'desc' => 'Mengantar orang tua kontrol kesehatan', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
+            ['name' => 'Dimas Prasetyo', 'nip' => 'MTR-2024-003', 'department' => 'Product & Design', 'position' => 'UI/UX Designer', 'type' => 'Cuti Tahunan', 'period' => '30/10/2026 – 31/10/2026', 'duration' => '2 Hari', 'desc' => 'Istirahat dan urusan perpanjangan masa sewa rumah', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
         ];
 
-        // 4. Data Cuti Ditolak (2)
-        $rejectedList = [
-            ['name' => 'Dimas Prasetyo', 'nip' => 'MTR-2024-003', 'department' => 'Product & Design', 'type' => 'Cuti Tahunan', 'period' => '01/10/2026 – 03/10/2026', 'duration' => '3 Hari', 'desc' => 'Liburan ke pantai bersama teman', 'reason' => 'Jadwal bertepatan dengan masa rilis sprint project MBKM.', 'status' => 'Ditolak', 'status_color' => 'bg-rose-50 text-rose-700 border-rose-200'],
-            ['name' => 'Dani Firmansyah', 'nip' => 'MTR-2024-009', 'department' => 'Sales & Business', 'type' => 'Cuti Tahunan', 'period' => '05/10/2026 – 08/10/2026', 'duration' => '4 Hari', 'desc' => 'Cuti mendadak ke luar pulau', 'reason' => 'Target closing akhir kuartal dan tim sales sedang kekurangan personil on-site.', 'status' => 'Ditolak', 'status_color' => 'bg-rose-50 text-rose-700 border-rose-200'],
+        $pendingNames = array_map('strtolower', array_column($pendingList, 'name'));
+        foreach ($demoPending as $dp) {
+            if (!in_array(strtolower($dp['name']), $pendingNames)) {
+                $pendingList[] = $dp;
+            }
+        }
+
+        // 4. Data Cuti Ditolak
+        $rejectedList = [];
+        if (isset($dbRejected) && $dbRejected->count() > 0) {
+            foreach ($dbRejected as $req) {
+                if ($req->user) {
+                    $startFmt = \Carbon\Carbon::parse($req->start_date)->format('d/m/Y');
+                    $endFmt = \Carbon\Carbon::parse($req->end_date)->format('d/m/Y');
+                    $rejectedList[] = [
+                        'name' => $req->user->name,
+                        'nip' => $req->user->nip ?? 'MTR-' . str_pad($req->user->id, 3, '0', STR_PAD_LEFT),
+                        'department' => $req->user->department ?? 'General Operations',
+                        'position' => $req->user->position ?? 'Mitra Kerja',
+                        'type' => $req->leaveType->name ?? 'Cuti',
+                        'period' => ($startFmt === $endFmt) ? $startFmt : ($startFmt . ' – ' . $endFmt),
+                        'duration' => ($req->total_days ?? 1) . ' Hari',
+                        'desc' => $req->reason ?? '-',
+                        'reason' => $req->rejection_reason ?? 'Ditolak oleh admin',
+                        'status' => 'Ditolak',
+                        'status_color' => 'bg-rose-50 text-rose-700 border-rose-200',
+                    ];
+                }
+            }
+        }
+
+        $demoRejected = [
+            ['name' => 'Dimas Prasetyo', 'nip' => 'MTR-2024-003', 'department' => 'Product & Design', 'position' => 'UI/UX Designer', 'type' => 'Cuti Tahunan', 'period' => '01/10/2026 – 03/10/2026', 'duration' => '3 Hari', 'desc' => 'Liburan ke pantai bersama teman', 'reason' => 'Jadwal bertepatan dengan masa rilis sprint project MBKM.', 'status' => 'Ditolak', 'status_color' => 'bg-rose-50 text-rose-700 border-rose-200'],
+            ['name' => 'Dani Firmansyah', 'nip' => 'MTR-2024-009', 'department' => 'Sales & Business', 'position' => 'Account Executive', 'type' => 'Cuti Tahunan', 'period' => '05/10/2026 – 08/10/2026', 'duration' => '4 Hari', 'desc' => 'Cuti mendadak ke luar pulau', 'reason' => 'Target closing akhir kuartal dan tim sales sedang kekurangan personil on-site.', 'status' => 'Ditolak', 'status_color' => 'bg-rose-50 text-rose-700 border-rose-200'],
         ];
+
+        $rejectedNames = array_map('strtolower', array_column($rejectedList, 'name'));
+        foreach ($demoRejected as $dr) {
+            if (!in_array(strtolower($dr['name']), $rejectedNames)) {
+                $rejectedList[] = $dr;
+            }
+        }
     @endphp
 
     // SIMPAN DATA KE WINDOW OBJECT
