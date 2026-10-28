@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Http\Controllers\Auth;
 
 use App\Enums\UserRole;
@@ -9,298 +10,421 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\LeaveBalance;
 use App\Models\LeaveType;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    // Registrasi akun mitra baru dan otomatis inisialisasi saldo kuota cuti awal
-    public function register(RegisterRequest $request): JsonResponse|RedirectResponse
-    {
-        // Simpan data akun pengguna baru ke tabel users dengan role mitra
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => UserRole::MITRA,
-            'is_active' => true,
-            'join_date' => now()->toDateString(),
-            'email_verified_at' => null, // Belum diverifikasi saat pendaftaran
-        ]);
+/**
+* Registrasi akun mitra dan inisialisasi saldo cuti.
+*/
+public function register(RegisterRequest $request): JsonResponse|RedirectResponse
+{
+$user = User::create([
+'name' => $request->name,
+'email' => $request->email,
+'password' => Hash::make($request->password),
+'role' => UserRole::MITRA,
+'is_active' => true,
+'join_date' => now()->toDateString(),
+'email_verified_at' => null,
+]);
 
-        // Buat saldo kuota cuti default tahun berjalan untuk akun baru
-        $year = (int) date('Y');
-        $leaveTypes = LeaveType::all();
-        foreach ($leaveTypes as $type) {
-            LeaveBalance::firstOrCreate(
-                [
-                    'user_id' => $user->id,
-                    'leave_type_id' => $type->id,
-                    'year' => $year,
-                ],
-                [
-                    'initial_quota' => $type->default_quota,
-                    'used_quota' => 0,
-                    'remaining_quota' => $type->default_quota,
-                ]
-            );
-        }
+$year = (int) date('Y');
 
-        // Kirimkan notifikasi email verifikasi ke alamat email pengguna
-        $user->sendEmailVerificationNotification();
+foreach (LeaveType::all() as $type) {
+LeaveBalance::firstOrCreate(
+[
+'user_id' => $user->id,
+'leave_type_id' => $type->id,
+'year' => $year,
+],
+[
+'initial_quota' => $type->default_quota,
+'used_quota' => 0,
+'remaining_quota' => $type->default_quota,
+]
+);
+}
 
-        // Kembalikan respons JSON jika request berasal dari API client
-        if ($request->wantsJson()) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Pendaftaran akun berhasil. Silakan verifikasi email Anda sebelum masuk.',
-                'data' => [
-                    'user' => [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'role' => $user->role->value,
-                        'role_label' => $user->role->label(),
-                    ],
-                ],
-            ], 201);
-        }
+$user->sendEmailVerificationNotification();
 
-        // Redirect ke halaman login dengan pesan sukses untuk request web biasa
-        return redirect()->route('login')
-            ->with('success', 'Pendaftaran akun berhasil! Tautan verifikasi telah dikirim ke email Anda (' . $user->email . '). Silakan lakukan verifikasi email terlebih dahulu sebelum login.')
-            ->with('unverified_email', $user->email);
-    }
+if ($request->wantsJson()) {
+return response()->json([
+'status' => 'success',
+'message' => 'Pendaftaran berhasil. Silakan verifikasi email sebelum login.',
+'data' => [
+'user' => [
+'id' => $user->id,
+'name' => $user->name,
+'email' => $user->email,
+'role' => $user->role->value,
+'role_label' => $user->role->label(),
+],
+],
+], 201);
+}
 
-    // Proses autentikasi login pengguna dan redirect sesuai role
-    public function login(LoginRequest $request): JsonResponse|RedirectResponse
-    {
-        $credentials = $request->only('email', 'password');
-        $remember = $request->boolean('remember');
+return redirect()
+->route('login')
+->with(
+'success',
+'Pendaftaran berhasil. Tautan verifikasi telah dikirim ke email Anda.'
+)
+->with('unverified_email', $user->email);
+}
 
-        // Pastikan akun admin bawaan selalu sinkron dan bernama Admin
-        if ($credentials['email'] === 'admin@workleave.test') {
-            $adminUser = User::where('email', 'admin@workleave.test')->first();
-            $allowedPass = in_array($credentials['password'], ['password', 'admin', 'admin123']);
-            if ($adminUser) {
-                $adminUser->name = 'Admin';
-                $adminUser->position = 'Admin';
-                if ($allowedPass) {
-                    $adminUser->password = Hash::make($credentials['password']);
-                }
-                $adminUser->is_active = true;
-                $adminUser->email_verified_at = now();
-                $adminUser->role = UserRole::ADMIN;
-                $adminUser->save();
-            } else {
-                User::create([
-                    'name' => 'Admin',
-                    'email' => 'admin@workleave.test',
-                    'password' => Hash::make($credentials['password'] ?: 'password'),
-                    'role' => UserRole::ADMIN,
-                    'nip' => 'ADM-001',
-                    'department' => 'Human Capital',
-                    'position' => 'Admin',
-                    'join_date' => '2022-01-01',
-                    'is_active' => true,
-                    'email_verified_at' => now(),
-                ]);
-            }
-        }
+/**
+* Login pengguna.
+*/
+public function login(LoginRequest $request): JsonResponse|RedirectResponse
+{
+$credentials = $request->only('email', 'password');
+$remember = $request->boolean('remember');
 
-        // Cek kecocokan email dan kata sandi pengguna
-        if (Auth::attempt($credentials, $remember)) {
-            $user = Auth::user();
+if (!Auth::attempt($credentials, $remember)) {
+if ($request->wantsJson()) {
+return response()->json([
+'status' => 'error',
+'message' => 'Email atau password salah.',
+], 401);
+}
 
-            // Cegah login jika email belum diverifikasi
-            if (!$user->hasVerifiedEmail()) {
-                $unverifiedEmail = $user->email;
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+return back()
+->withErrors([
+'email' => 'Email atau password salah.',
+])
+->withInput($request->only('email'));
+}
 
-                if ($request->wantsJson()) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Email Anda belum diverifikasi. Silakan periksa email Anda dan lakukan verifikasi terlebih dahulu.',
-                        'needs_verification' => true,
-                        'email' => $unverifiedEmail,
-                    ], 403);
-                }
+$user = Auth::user();
 
-                return back()
-                    ->withErrors(['email' => 'Email Anda belum diverifikasi. Silakan periksa kotak masuk/spam email Anda untuk verifikasi terlebih dahulu sebelum login.'])
-                    ->withInput()
-                    ->with('unverified_email', $unverifiedEmail);
-            }
+if (!$user->hasVerifiedEmail()) {
+$email = $user->email;
 
-            // Tolak login jika akun pengguna dinonaktifkan oleh administrator
-            if (!$user->is_active) {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+Auth::logout();
+$request->session()->invalidate();
+$request->session()->regenerateToken();
 
-                if ($request->wantsJson()) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Akun Anda dinonaktifkan. Silakan hubungi admin.',
-                    ], 403);
-                }
+if ($request->wantsJson()) {
+return response()->json([
+'status' => 'error',
+'message' => 'Email belum diverifikasi.',
+'needs_verification' => true,
+'email' => $email,
+], 403);
+}
 
-                return back()->withErrors(['email' => 'Akun Anda dinonaktifkan. Silakan hubungi admin.'])->withInput();
-            }
+return back()
+->withErrors([
+'email' => 'Email belum diverifikasi. Periksa kotak masuk atau folder spam.',
+])
+->withInput($request->only('email'))
+->with('unverified_email', $email);
+}
 
-            $request->session()->regenerate();
+if (!$user->is_active) {
+Auth::logout();
+$request->session()->invalidate();
+$request->session()->regenerateToken();
 
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Login berhasil. Selamat datang, ' . $user->name,
-                    'data' => [
-                        'user' => [
-                            'id' => $user->id,
-                            'name' => $user->name,
-                            'email' => $user->email,
-                            'role' => $user->role->value,
-                            'role_label' => $user->role->label(),
-                            'nip' => $user->nip,
-                            'department' => $user->department,
-                            'position' => $user->position,
-                        ],
-                    ],
-                ]);
-            }
+if ($request->wantsJson()) {
+return response()->json([
+'status' => 'error',
+'message' => 'Akun dinonaktifkan. Silakan hubungi admin.',
+], 403);
+}
 
-            // Alihkan admin ke halaman admin dashboard
-            if ($user->isAdmin()) {
-                return redirect()->route('admin.dashboard');
-            }
+return back()
+->withErrors([
+'email' => 'Akun dinonaktifkan. Silakan hubungi admin.',
+])
+->withInput($request->only('email'));
+}
 
-            // Alihkan mitra ke halaman user dashboard
-            return redirect('/dashboard');
-        }
+$request->session()->regenerate();
 
-        // Kembalikan error jika kredensial salah
-        if ($request->wantsJson()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Email atau kata sandi yang Anda masukkan salah.',
-            ], 401);
-        }
+if ($request->wantsJson()) {
+return response()->json([
+'status' => 'success',
+'message' => 'Login berhasil.',
+'data' => [
+'user' => [
+'id' => $user->id,
+'name' => $user->name,
+'email' => $user->email,
+'role' => $user->role->value,
+'role_label' => $user->role->label(),
+'nip' => $user->nip,
+'department' => $user->department,
+'position' => $user->position,
+],
+],
+]);
+}
 
-        return back()->withErrors(['email' => 'Email atau kata sandi yang Anda masukkan salah.'])->withInput();
-    }
+if ($user->isAdmin()) {
+return redirect()->route('admin.dashboard');
+}
 
-    // Verifikasi email pengguna melalui signed link
-    public function verifyEmail(Request $request, $id, $hash): RedirectResponse|JsonResponse
-    {
-        $user = User::findOrFail($id);
+return redirect()->route('dashboard');
+}
 
-        if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Tautan verifikasi tidak valid atau telah kedaluwarsa.',
-                ], 403);
-            }
-            return redirect()->route('login')->withErrors(['email' => 'Tautan verifikasi tidak valid atau telah kedaluwarsa.']);
-        }
+/**
+* Mengirim tautan reset password ke email pengguna.
+*/
+public function sendResetLinkEmail(Request $request): JsonResponse|RedirectResponse
+{
+$request->validate([
+'email' => ['required', 'email'],
+], [
+'email.required' => 'Alamat email wajib diisi.',
+'email.email' => 'Format email tidak valid.',
+]);
 
-        if ($user->hasVerifiedEmail()) {
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'info',
-                    'message' => 'Email sudah terverifikasi sebelumnya. Silakan login.',
-                ]);
-            }
-            return redirect()->route('login')->with('info', 'Email Anda sudah terverifikasi sebelumnya. Silakan login.');
-        }
+$status = Password::sendResetLink(
+$request->only('email')
+);
 
-        $user->markEmailAsVerified();
+if ($request->wantsJson()) {
+$success = $status === Password::RESET_LINK_SENT;
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Email berhasil diverifikasi. Silakan login.',
-            ]);
-        }
+return response()->json([
+'status' => $success ? 'success' : 'error',
+'message' => __($status),
+], $success ? 200 : 422);
+}
 
-        return redirect()->route('login')->with('success', 'Email Anda berhasil diverifikasi! Silakan login untuk melanjutkan.');
-    }
+if ($status === Password::RESET_LINK_SENT) {
+return back()->with('status', __($status));
+}
 
-    // Kirim ulang email verifikasi
-    public function resendVerification(Request $request): RedirectResponse|JsonResponse
-    {
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-        ], [
-            'email.required' => 'Alamat email wajib diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'email.exists' => 'Alamat email tidak ditemukan dalam sistem.',
-        ]);
+return back()
+->withErrors(['email' => __($status)])
+->withInput($request->only('email'));
+}
 
-        $user = User::where('email', $request->email)->first();
+/**
+* Menampilkan formulir reset password.
+*/
+public function showResetForm(Request $request, string $token): View
+{
+return view('auth.reset-password', [
+'token' => $token,
+'email' => $request->query('email', ''),
+]);
+}
 
-        if ($user->hasVerifiedEmail()) {
-            return redirect()->route('login')->with('info', 'Email Anda sudah terverifikasi sebelumnya. Silakan login.');
-        }
+/**
+* Memvalidasi token dan menyimpan password baru.
+*/
+public function resetPassword(Request $request): JsonResponse|RedirectResponse
+{
+$request->validate([
+'token' => ['required', 'string'],
+'email' => ['required', 'email'],
+'password' => [
+'required',
+'string',
+'min:8',
+'confirmed',
+],
+], [
+'token.required' => 'Token reset password tidak ditemukan.',
+'email.required' => 'Alamat email wajib diisi.',
+'email.email' => 'Format email tidak valid.',
+'password.required' => 'Password baru wajib diisi.',
+'password.min' => 'Password minimal 8 karakter.',
+'password.confirmed' => 'Konfirmasi password tidak cocok.',
+]);
 
-        $user->sendEmailVerificationNotification();
+$status = Password::reset(
+$request->only(
+'email',
+'password',
+'password_confirmation',
+'token'
+),
+function ($user, $password) {
+$user->forceFill([
+'password' => Hash::make($password),
+'remember_token' => Str::random(60),
+])->save();
+}
+);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Tautan verifikasi baru telah dikirim ke email Anda.',
-            ]);
-        }
+if ($request->wantsJson()) {
+$success = $status === Password::PASSWORD_RESET;
 
-        return redirect()->route('login')
-            ->with('success', 'Tautan verifikasi baru telah berhasil dikirim ke ' . $user->email . '. Silakan periksa kotak masuk atau spam email Anda.')
-            ->with('unverified_email', $user->email);
-    }
+return response()->json([
+'status' => $success ? 'success' : 'error',
+'message' => __($status),
+], $success ? 200 : 422);
+}
 
-    // Ambil data profil user yang sedang login saat ini
-    public function me(Request $request): JsonResponse
-    {
-        $user = $request->user();
+if ($status === Password::PASSWORD_RESET) {
+return redirect()
+->route('login')
+->with(
+'success',
+'Password berhasil diubah. Silakan login dengan password baru.'
+);
+}
 
-        return response()->json([
-            'status' => 'success',
-            'data' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role->value,
-                'role_label' => $user->role->label(),
-                'nip' => $user->nip,
-                'department' => $user->department,
-                'position' => $user->position,
-                'join_date' => $user->join_date?->toDateString(),
-            ],
-        ]);
-    }
+return back()
+->withErrors(['email' => __($status)])
+->withInput($request->only('email'));
+}
 
-    // Proses keluar akun, bersihkan sesi login, dan redirect ke halaman login
-    public function logout(Request $request): JsonResponse|RedirectResponse
-    {
-        // Logout user dari sistem autentikasi
-        Auth::logout();
+/**
+* Memverifikasi email pengguna.
+*/
+public function verifyEmail(
+Request $request,
+$id,
+$hash
+): RedirectResponse|JsonResponse {
+$user = User::findOrFail($id);
 
-        // Bersihkan dan perbarui token sesi keamanan
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+if (!hash_equals(
+(string) $hash,
+sha1($user->getEmailForVerification())
+)) {
+if ($request->wantsJson()) {
+return response()->json([
+'status' => 'error',
+'message' => 'Tautan verifikasi tidak valid.',
+], 403);
+}
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Anda telah berhasil keluar.',
-            ]);
-        }
+return redirect()
+->route('login')
+->withErrors([
+'email' => 'Tautan verifikasi tidak valid.',
+]);
+}
 
-        // Arahkan kembali ke halaman login dengan pesan sukses
-        return redirect()->route('login')->with('success', 'Anda telah berhasil keluar.');
-    }
+if ($user->hasVerifiedEmail()) {
+if ($request->wantsJson()) {
+return response()->json([
+'status' => 'info',
+'message' => 'Email sudah diverifikasi. Silakan login.',
+]);
+}
+
+return redirect()
+->route('login')
+->with('info', 'Email sudah diverifikasi. Silakan login.');
+}
+
+$user->markEmailAsVerified();
+
+if ($request->wantsJson()) {
+return response()->json([
+'status' => 'success',
+'message' => 'Email berhasil diverifikasi. Silakan login.',
+]);
+}
+
+return redirect()
+->route('login')
+->with('success', 'Email berhasil diverifikasi. Silakan login.');
+}
+
+/**
+* Mengirim ulang email verifikasi.
+*/
+public function resendVerification(Request $request): JsonResponse|RedirectResponse
+{
+$request->validate([
+'email' => ['required', 'email', 'exists:users,email'],
+], [
+'email.required' => 'Alamat email wajib diisi.',
+'email.email' => 'Format email tidak valid.',
+'email.exists' => 'Alamat email tidak ditemukan.',
+]);
+
+$user = User::where('email', $request->email)->firstOrFail();
+
+if ($user->hasVerifiedEmail()) {
+if ($request->wantsJson()) {
+return response()->json([
+'status' => 'info',
+'message' => 'Email sudah diverifikasi.',
+]);
+}
+
+return redirect()
+->route('login')
+->with('info', 'Email sudah diverifikasi. Silakan login.');
+}
+
+$user->sendEmailVerificationNotification();
+
+if ($request->wantsJson()) {
+return response()->json([
+'status' => 'success',
+'message' => 'Tautan verifikasi baru telah dikirim.',
+]);
+}
+
+return redirect()
+->route('login')
+->with(
+'success',
+'Tautan verifikasi baru telah dikirim. Periksa kotak masuk atau folder spam.'
+)
+->with('unverified_email', $user->email);
+}
+
+/**
+* Mengambil profil pengguna yang sedang login.
+*/
+public function me(Request $request): JsonResponse
+{
+$user = $request->user();
+
+return response()->json([
+'status' => 'success',
+'data' => [
+'id' => $user->id,
+'name' => $user->name,
+'email' => $user->email,
+'role' => $user->role->value,
+'role_label' => $user->role->label(),
+'nip' => $user->nip,
+'department' => $user->department,
+'position' => $user->position,
+'join_date' => $user->join_date?->toDateString(),
+],
+]);
+}
+
+/**
+* Logout dan membersihkan sesi.
+*/
+public function logout(Request $request): JsonResponse|RedirectResponse
+{
+Auth::logout();
+
+$request->session()->invalidate();
+$request->session()->regenerateToken();
+
+if ($request->wantsJson()) {
+return response()->json([
+'status' => 'success',
+'message' => 'Anda berhasil logout.',
+]);
+}
+
+return redirect()
+->route('login')
+->with('success', 'Anda berhasil logout.');
+}
 }
