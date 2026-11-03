@@ -6,12 +6,6 @@ use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\UserDashboardController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes - WorkLeave Starter Backend
-|--------------------------------------------------------------------------
-*/
-
 // Rute Publik (Tamu / Belum Login)
 Route::middleware('guest')->group(function () {
     // Halaman utama / form login
@@ -34,6 +28,15 @@ Route::middleware('guest')->group(function () {
     Route::get('/forgot-password', function () {
         return view('auth.forgot-password');
     })->name('password.request');
+
+    // Kirim tautan reset password ke email
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+
+    // Formulir untuk membuat password baru
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+
+    // Simpan kata sandi baru
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 // Verifikasi Email Akun

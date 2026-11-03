@@ -1,19 +1,15 @@
+```blade
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forgot Password - WorkLeave</title>
-    
-    <!-- Google Fonts: Poppins & Montserrat Alternates -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat+Alternates:wght@600;700&display=swap" rel="stylesheet">
-    <style> 
-        body { font-family: 'Poppins', sans-serif; } 
-        .brand-font { font-family: 'Montserrat Alternates', sans-serif; }
-    </style>
+    <title>Reset Password - WorkLeave</title>
 
-    <!-- Tailwind CSS CDN -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat+Alternates:wght@600;700&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -25,69 +21,184 @@
                         'wl-grey-dark': '#5D5D5D',
                         'wl-grey-light': '#B2B3B8',
                         'wl-white': '#FAFAFA',
-                        'wl-input-bg': '#FFF5F6', 
+                        'wl-input-bg': '#FFF5F6',
                         'wl-input-text': '#F3A8A8'
                     }
                 }
             }
         }
     </script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .brand-font {
+            font-family: 'Montserrat Alternates', sans-serif;
+        }
+    </style>
 </head>
+
 <body class="text-wl-black bg-white min-h-screen flex items-center justify-center relative overflow-x-hidden">
 
-    <!-- Section Brand Logo -->
+    <!-- Logo WorkLeave -->
     <div class="absolute top-6 left-6 flex items-center space-x-3">
-        <img src="{{ asset('img/logo.png') }}" alt="WorkLeave" class="h-10 w-auto object-contain">
-        <span class="text-2xl font-bold tracking-tight text-[#9B0010] brand-font">WorkLeave.com</span>
+        <img src="{{ asset('img/logo.png') }}"
+             alt="WorkLeave"
+             class="h-10 w-auto object-contain">
+
+        <span class="text-2xl font-bold tracking-tight text-[#9B0010] brand-font">
+            WorkLeave.com
+        </span>
     </div>
 
-    <!-- Main Container -->
-    <div class="w-full max-w-7xl mx-auto flex items-center justify-between px-12 lg:px-20 pt-16">
+    <!-- Konten Utama -->
+    <div class="w-full max-w-7xl mx-auto flex items-center justify-between px-6 md:px-12 lg:px-20 py-24">
 
-        <!-- Section Left: Illustration -->
-        <div class="w-1/2 flex justify-center items-center pr-8">
-            <img src="{{ asset('img/illust.png') }}" alt="Illustration" class="w-[85%] max-w-md">
+        <!-- Ilustrasi -->
+        <div class="hidden md:flex w-1/2 justify-center items-center pr-8">
+            <img src="{{ asset('img/illust.png') }}"
+                 alt="Ilustrasi reset password WorkLeave"
+                 class="w-[85%] max-w-md">
         </div>
 
-        <!-- Section Right: Form Forgot Password -->
-        <div class="w-1/2 flex justify-start pl-16 items-center">
+        <!-- Form Reset Password -->
+        <div class="w-full md:w-1/2 flex justify-center md:justify-start md:pl-8 lg:pl-16">
             <div class="w-full max-w-md">
-                
-                <h1 class="text-[36px] font-bold text-left mb-3 tracking-tight text-black">Forgot Password?</h1>
+
+                <h1 class="text-3xl md:text-[36px] font-bold mb-3 tracking-tight text-black">
+                    Reset Password
+                </h1>
+
                 <p class="text-wl-grey-dark text-sm mb-8 leading-relaxed">
-                    Don't worry! Enter your registered email address below, and we'll send you instructions to reset your password.
+                    Buat password baru untuk akun WorkLeave Anda.
+                    Gunakan password yang kuat dan jangan bagikan kepada siapa pun.
                 </p>
 
-                <form action="#" method="POST" class="space-y-6">
-                    <!-- Input: Email Address -->
-                    <div class="relative">
-                        <input type="email" placeholder="Enter your registered email"
-                            class="w-full bg-wl-input-bg text-wl-black px-6 py-4 rounded-xl focus:outline-none focus:ring-1 focus:ring-wl-red-light placeholder:text-wl-input-text placeholder:font-light">
-                        <div class="absolute inset-y-0 right-6 flex items-center text-wl-grey-light">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-                            </svg>
-                        </div>
+                <!-- Pesan Kesalahan Umum -->
+                @if ($errors->any())
+                    <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        <p class="font-semibold mb-1">
+                            Password belum berhasil diubah.
+                        </p>
+                        <ul class="list-disc pl-5 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <form action="{{ route('password.update') }}"
+                      method="POST"
+                      class="space-y-5">
+
+                    @csrf
+
+                    <!-- Token reset password dari tautan email -->
+                    <input type="hidden"
+                           name="token"
+                           value="{{ $token }}">
+
+                    <!-- Email -->
+                    <div>
+                        <label for="email"
+                               class="block text-sm font-medium text-wl-black mb-2">
+                            Email Address
+                        </label>
+
+                        <input
+                            id="email"
+                            type="email"
+                            name="email"
+                            value="{{ old('email', $email ?? '') }}"
+                            placeholder="Masukkan email terdaftar"
+                            autocomplete="email"
+                            required
+                            readonly
+                            class="w-full bg-wl-input-bg text-wl-black px-6 py-4 rounded-xl border border-transparent focus:outline-none focus:ring-2 focus:ring-wl-red-light @error('email') border-red-500 @enderror"
+                        >
+
+                        @error('email')
+                            <p class="mt-2 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
-                    <!-- Button: Send Reset Link -->
-                    <div class="pt-2 pb-2">
-                        <button type="button"
-                            class="w-full bg-[#C12132] text-white font-medium py-4 rounded-xl hover:bg-wl-red-dark transition-all duration-300 shadow-[0_8px_25px_rgba(193,33,50,0.25)]">
-                            Send Reset Instructions
+                    <!-- Password Baru -->
+                    <div>
+                        <label for="password"
+                               class="block text-sm font-medium text-wl-black mb-2">
+                            Password Baru
+                        </label>
+
+                        <input
+                            id="password"
+                            type="password"
+                            name="password"
+                            placeholder="Masukkan password baru"
+                            autocomplete="new-password"
+                            minlength="8"
+                            required
+                            autofocus
+                            class="w-full bg-wl-input-bg text-wl-black px-6 py-4 rounded-xl border border-transparent focus:outline-none focus:ring-2 focus:ring-wl-red-light @error('password') border-red-500 @enderror"
+                        >
+
+                        <p class="mt-2 text-xs text-wl-grey-dark">
+                            Password minimal 8 karakter.
+                        </p>
+
+                        @error('password')
+                            <p class="mt-2 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    <!-- Konfirmasi Password -->
+                    <div>
+                        <label for="password_confirmation"
+                               class="block text-sm font-medium text-wl-black mb-2">
+                            Konfirmasi Password Baru
+                        </label>
+
+                        <input
+                            id="password_confirmation"
+                            type="password"
+                            name="password_confirmation"
+                            placeholder="Ulangi password baru"
+                            autocomplete="new-password"
+                            minlength="8"
+                            required
+                            class="w-full bg-wl-input-bg text-wl-black px-6 py-4 rounded-xl border border-transparent focus:outline-none focus:ring-2 focus:ring-wl-red-light"
+                        >
+                    </div>
+
+                    <!-- Tombol Submit -->
+                    <div class="pt-2">
+                        <button
+                            type="submit"
+                            class="w-full bg-[#C12132] text-white font-medium py-4 rounded-xl hover:bg-wl-red-dark focus:outline-none focus:ring-2 focus:ring-wl-red-light focus:ring-offset-2 transition-all duration-300 shadow-[0_8px_25px_rgba(193,33,50,0.25)]">
+                            Ubah Password
                         </button>
                     </div>
                 </form>
 
-                <!-- Link: Back to Login -->
-                <p class="text-left text-wl-black mt-6 text-[15px]">
-                    Remembered your password? <a href="{{ url('/') }}" class="text-[#C12132] font-semibold hover:underline ml-1">Sign in here !</a>
+                <!-- Kembali ke Login -->
+                <p class="text-wl-black mt-6 text-sm md:text-[15px]">
+                    Ingat password Anda?
+                    <a href="{{ route('login') }}"
+                       class="text-[#C12132] font-semibold hover:underline ml-1">
+                        Login di sini
+                    </a>
                 </p>
 
             </div>
         </div>
-
     </div>
 
 </body>
 </html>
+```

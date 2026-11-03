@@ -9,11 +9,13 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\LeaveBalance;
 use App\Models\LeaveType;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
@@ -27,7 +29,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'role' => UserRole::MITRA,
             'is_active' => true,
-            'email_verified_at' => null, // Belum diverifikasi saat pendaftaran
+            'email_verified_at' => null,
         ]);
 
         // Buat saldo kuota cuti default tahun berjalan untuk akun baru
@@ -118,40 +120,24 @@ class AuthController extends Controller
                 if ($request->wantsJson()) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Email Anda belum diverifikasi. Silakan periksa email Anda dan lakukan verifikasi terlebih dahulu.',
-                        'needs_verification' => true,
+                        'message' => 'Email Anda belum diverifikasi. Silakan periksa email Anda dan lakukan verifikasi terlebih dahulu sebelum masuk.',
+                        'requires_verification' => true,
                         'email' => $unverifiedEmail,
                     ], 403);
                 }
 
-                return back()
-                    ->withErrors(['email' => 'Email Anda belum diverifikasi. Silakan periksa kotak masuk/spam email Anda untuk verifikasi terlebih dahulu sebelum login.'])
-                    ->withInput()
+                return redirect()->route('login')
+                    ->withErrors(['email' => 'Email Anda belum diverifikasi. Silakan periksa kotak masuk Anda atau klik tombol kirim ulang di bawah.'])
                     ->with('unverified_email', $unverifiedEmail);
             }
 
-            // Tolak login jika akun pengguna dinonaktifkan oleh administrator
-            if (!$user->is_active) {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-
-                if ($request->wantsJson()) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Akun Anda dinonaktifkan. Silakan hubungi admin.',
-                    ], 403);
-                }
-
-                return back()->withErrors(['email' => 'Akun Anda dinonaktifkan. Silakan hubungi admin.'])->withInput();
-            }
-
+            // Perbarui ID sesi untuk mencegah serangan session fixation
             $request->session()->regenerate();
 
             if ($request->wantsJson()) {
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Login berhasil. Selamat datang, ' . $user->name,
+                    'message' => 'Login berhasil.',
                     'data' => [
                         'user' => [
                             'id' => $user->id,
@@ -182,6 +168,82 @@ class AuthController extends Controller
         }
 
         return back()->withErrors(['email' => 'Email atau kata sandi yang Anda masukkan salah.'])->withInput();
+    }
+
+    // Kirim tautan reset password ke alamat email
+    public function sendResetLinkEmail(Request $request): JsonResponse|RedirectResponse
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+        ], [
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+        ]);
+
+        $status = Password::sendResetLink($request->only('email'));
+
+        if ($request->wantsJson()) {
+            $success = $status === Password::RESET_LINK_SENT;
+            return response()->json([
+                'status' => $success ? 'success' : 'error',
+                'message' => __($status),
+            ], $success ? 200 : 422);
+        }
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return back()->with('status', __($status));
+        }
+
+        return back()->withErrors(['email' => __($status)])->withInput($request->only('email'));
+    }
+
+    // Tampilkan formulir reset password
+    public function showResetForm(Request $request, string $token): View
+    {
+        return view('auth.reset-password', [
+            'token' => $token,
+            'email' => $request->query('email', ''),
+        ]);
+    }
+
+    // Validasi token dan simpan kata sandi baru
+    public function resetPassword(Request $request): JsonResponse|RedirectResponse
+    {
+        $request->validate([
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'token.required' => 'Token reset password tidak ditemukan.',
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'password.required' => 'Kata sandi baru wajib diisi.',
+            'password.min' => 'Kata sandi minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                ])->save();
+            }
+        );
+
+        if ($request->wantsJson()) {
+            $success = $status === Password::PASSWORD_RESET;
+            return response()->json([
+                'status' => $success ? 'success' : 'error',
+                'message' => __($status),
+            ], $success ? 200 : 422);
+        }
+
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('success', 'Kata sandi berhasil diubah. Silakan masuk dengan kata sandi baru.');
+        }
+
+        return back()->withErrors(['email' => __($status)])->withInput($request->only('email'));
     }
 
     // Verifikasi email pengguna melalui signed link
