@@ -229,7 +229,8 @@
     <div id="toastContainer" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] flex flex-col gap-3 w-full max-w-2xl px-4 pointer-events-none"></div>
 
     <script>
-        function showToastNotification(action) {
+        function showToastNotification(action, name = '', period = '') {
+            const subject = name ? `${name}${period ? ' (' + period + ')' : ''}` : '';
             const config = {
                 setujui: {
                     icon: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -239,7 +240,9 @@
                     wrapBg  : 'bg-[#F0FDF8] border-emerald-200',
                     titleCls: 'text-[#10B981]',
                     title   : 'Pengajuan Berhasil Disetujui!',
-                    desc    : 'Pengajuan cuti Siti (11/10/2026 – 13/10/2026) telah masuk dan dicatat di baris pertama tabel riwayat.',
+                    desc    : subject 
+                        ? `Pengajuan cuti ${subject} telah masuk dan dicatat di baris pertama tabel riwayat.` 
+                        : 'Pengajuan cuti telah masuk dan dicatat di baris pertama tabel riwayat.',
                 },
                 tunda: {
                     icon: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -249,7 +252,9 @@
                     wrapBg  : 'bg-[#FFFBEB] border-amber-200',
                     titleCls: 'text-[#D97706]',
                     title   : 'Pengajuan Berhasil Ditunda!',
-                    desc    : 'Pengajuan cuti Siti (11/10/2026 – 13/10/2026) telah ditunda dan akan diproses kembali.',
+                    desc    : subject 
+                        ? `Pengajuan cuti ${subject} telah ditunda dan akan diproses kembali.` 
+                        : 'Pengajuan cuti telah ditunda dan akan diproses kembali.',
                 },
                 tolak: {
                     icon: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -259,7 +264,9 @@
                     wrapBg  : 'bg-[#FFF1F2] border-rose-200',
                     titleCls: 'text-[#DC2626]',
                     title   : 'Pengajuan Berhasil Ditolak!',
-                    desc    : 'Pengajuan cuti Siti (11/10/2026 – 13/10/2026) telah ditolak dan akan diberitahukan kepada pegawai.',
+                    desc    : subject 
+                        ? `Pengajuan cuti ${subject} telah ditolak dan akan diberitahukan kepada pegawai.` 
+                        : 'Pengajuan cuti telah ditolak dan akan diberitahukan kepada pegawai.',
                 },
             };
 
@@ -288,19 +295,37 @@
             toast.setAttribute('data-toast', '');
 
             const container = document.getElementById('toastContainer');
-            container.appendChild(toast);
+            if (container) {
+                container.appendChild(toast);
 
-            requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    toast.classList.remove('opacity-0', 'translate-y-4');
+                    requestAnimationFrame(() => {
+                        toast.classList.remove('opacity-0', 'translate-y-4');
+                    });
                 });
-            });
 
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-4');
-                setTimeout(() => toast.remove(), 300);
-            }, 5000);
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-4');
+                    setTimeout(() => toast.remove(), 300);
+                }, 5000);
+            }
         }
+
+        // Tampilkan toast dari antrean sessionStorage jika ada aksi baru disetujui / ditolak
+        document.addEventListener('DOMContentLoaded', function () {
+            const pendingToast = sessionStorage.getItem('workleave_toast');
+            if (pendingToast) {
+                sessionStorage.removeItem('workleave_toast');
+                try {
+                    const data = JSON.parse(pendingToast);
+                    if (data && data.action) {
+                        showToastNotification(data.action, data.name || '', data.period || '');
+                    }
+                } catch (e) {
+                    console.error('Error parsing pending toast:', e);
+                }
+            }
+        });
     </script>
 
 </body>

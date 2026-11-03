@@ -8,24 +8,21 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string ...$roles
-     */
+    // Filter hak akses rute berdasarkan peran (role) pengguna yang terautentikasi
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         $user = $request->user();
 
+        // Alihkan ke form login jika pengguna belum terautentikasi
         if (!$user) {
             return redirect()->route('login');
         }
 
         $userRoleValue = is_string($user->role) ? $user->role : $user->role->value;
 
+        // Validasi apakah peran user termasuk dalam daftar peran yang diizinkan
         if (!in_array($userRoleValue, $roles, true)) {
-            // Jika admin mencoba mengakses halaman mitra, alihkan langsung ke Dashboard Admin
+            // Jika admin mencoba mengakses halaman mitra, arahkan langsung ke Dashboard Admin
             if ($user->isAdmin()) {
                 return redirect()->route('admin.dashboard');
             }

@@ -6,9 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    // Jalankan migrasi pembuatan tabel
     public function up(): void
     {
         Schema::create('leave_requests', function (Blueprint $table) {
@@ -17,10 +15,9 @@ return new class extends Migration
             $table->foreignId('leave_type_id')->constrained('leave_types')->cascadeOnDelete();
             $table->date('start_date');
             $table->date('end_date');
-            $table->unsignedInteger('total_days'); // Lama cuti dalam hari kerja
-            $table->text('reason'); // Alasan / keperluan pengajuan
-            $table->string('attachment_path')->nullable(); // Bukti surat / dokumen
-            $table->string('emergency_contact')->nullable(); // Nomor kontak yang bisa dihubungi saat cuti
+            $table->unsignedInteger('total_days'); // Durasi cuti (hari)
+            $table->text('reason'); // Keterangan / alasan cuti
+            $table->string('attachment_path')->nullable(); // Dokumen pendukung / file lampiran
             $table->enum('status', ['pending', 'approved', 'rejected', 'cancelled'])->default('pending');
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('action_at')->nullable();
@@ -29,9 +26,7 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    // Batalkan migrasi dan hapus tabel
     public function down(): void
     {
         Schema::dropIfExists('leave_requests');

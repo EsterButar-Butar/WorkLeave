@@ -17,13 +17,12 @@ class ReportController extends Controller
     {
         $year = (int) ($request->input('year', date('Y')));
         $month = $request->input('month');
-        $department = $request->input('department');
         $leaveTypeId = $request->input('leave_type_id');
         $status = $request->input('status', LeaveStatus::APPROVED->value);
 
         // Siapkan query data cuti tahun berjalan beserta relasi user dan jenis cuti
         $query = LeaveRequest::with([
-            'user:id,name,email,nip,department,position',
+            'user:id,name,email,role',
             'leaveType:id,name,code',
             'approver:id,name,email',
         ])->whereYear('start_date', $year);
@@ -31,13 +30,6 @@ class ReportController extends Controller
         // Filter berdasarkan bulan jika dipilih
         if ($month) {
             $query->whereMonth('start_date', $month);
-        }
-
-        // Filter berdasarkan departemen / divisi karyawan
-        if ($department) {
-            $query->whereHas('user', function ($q) use ($department) {
-                $q->where('department', $department);
-            });
         }
 
         // Filter berdasarkan kategori jenis cuti
@@ -62,7 +54,6 @@ class ReportController extends Controller
             'filters' => [
                 'year' => $year,
                 'month' => $month,
-                'department' => $department,
                 'leave_type_id' => $leaveTypeId,
                 'status' => $status,
             ],

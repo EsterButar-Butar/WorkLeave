@@ -23,16 +23,15 @@ class LeaveBalanceController extends Controller
 
         // Query data kuota per tahun dengan relasi data mitra dan jenis cuti
         $query = LeaveBalance::with([
-            'user:id,name,email,nip,department,position',
+            'user:id,name,email,role',
             'leaveType:id,name,code',
         ])->where('year', $year);
 
-        // Filter pencarian berdasarkan nama, NIP, atau departemen
+        // Filter pencarian berdasarkan nama atau email
         if ($search) {
             $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('nip', 'like', "%{$search}%")
-                  ->orWhere('department', 'like', "%{$search}%");
+                  ->orWhere('email', 'like', "%{$search}%");
             });
         }
 

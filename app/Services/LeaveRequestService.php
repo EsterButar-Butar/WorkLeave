@@ -38,8 +38,9 @@ class LeaveRequestService
 
         // Periksa apakah sisa kuota cuti pemohon masih mencukupi
         $requestYear = (int) $startDate->format('Y');
-        if (!$this->balanceService->hasEnoughBalance($user, $leaveType, $totalDays, $requestYear)) {
-            throw new InvalidArgumentException('Sisa kuota cuti Anda tidak mencukupi untuk jumlah hari pengajuan ini.');
+        $balance = $this->balanceService->getOrCreateBalance($user, $leaveType, $requestYear);
+        if ($leaveType->default_quota > 0 && $balance->remaining_quota < $totalDays) {
+            throw new InvalidArgumentException("Sisa kuota {$leaveType->name} Anda tersisa {$balance->remaining_quota} hari (dari batas {$balance->initial_quota} hari/tahun), tidak mencukupi untuk pengajuan {$totalDays} hari ini.");
         }
 
         // Simpan data pengajuan cuti baru dengan status pending
@@ -51,7 +52,6 @@ class LeaveRequestService
             'total_days' => $totalDays,
             'reason' => $data['reason'],
             'attachment_path' => $data['attachment_path'] ?? null,
-            'emergency_contact' => $data['emergency_contact'] ?? null,
             'status' => LeaveStatus::PENDING,
         ]);
     }

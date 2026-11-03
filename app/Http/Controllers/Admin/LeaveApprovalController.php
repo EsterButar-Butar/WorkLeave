@@ -22,15 +22,15 @@ class LeaveApprovalController extends Controller
     {
         // Query pengajuan berstatus pending dengan data user pemohon dan jenis cutinya
         $query = LeaveRequest::with([
-            'user:id,name,email,nip,department,position',
+            'user:id,name,email,role',
             'leaveType:id,name,code,default_quota',
         ])->where('status', LeaveStatus::PENDING);
 
-        // Filter pencarian berdasarkan nama pemohon atau NIP jika diisi
+        // Filter pencarian berdasarkan nama atau email pemohon jika diisi
         if ($search = $request->input('search')) {
             $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('nip', 'like', "%{$search}%");
+                  ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -47,7 +47,8 @@ class LeaveApprovalController extends Controller
     public function approve(Request $request, LeaveRequest $leaveRequest): JsonResponse|\Illuminate\Http\RedirectResponse
     {
         try {
-            $note = $request->input('note');
+            // Selaraskan payload catatan (bisa 'note' maupun 'notes')
+            $note = $request->input('note') ?? $request->input('notes');
             // Panggil service untuk setujui cuti dan potong saldo kuota mitra
             $updated = $this->leaveRequestService->approveRequest($leaveRequest, $request->user(), $note);
 
@@ -75,6 +76,12 @@ class LeaveApprovalController extends Controller
     // Tolak permohonan cuti mitra oleh admin beserta catatan alasannya
     public function reject(Request $request, LeaveRequest $leaveRequest): JsonResponse|\Illuminate\Http\RedirectResponse
     {
+        // Selaraskan payload alasan penolakan (bisa 'rejection_reason', 'reason', maupun 'notes')
+        $rawReason = $request->input('rejection_reason') ?? $request->input('reason') ?? $request->input('notes');
+        if ($rawReason !== null) {
+            $request->merge(['rejection_reason' => trim($rawReason)]);
+        }
+
         // Validasi wajib menyertakan alasan penolakan
         $request->validate([
             'rejection_reason' => 'required|string|max:500',

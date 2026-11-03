@@ -6,9 +6,7 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
+    // Registrasi service aplikasi jika diperlukan
     public function register(): void
     {
         //
@@ -20,11 +18,8 @@ class AppServiceProvider extends ServiceProvider
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
                 \App\Models\User::where('email', 'admin@workleave.test')
-                    ->where(function ($query) {
-                        $query->where('name', '!=', 'Admin')
-                              ->orWhere('position', '!=', 'Admin');
-                    })
-                    ->update(['name' => 'Admin', 'position' => 'Admin']);
+                    ->where('name', '!=', 'Admin')
+                    ->update(['name' => 'Admin']);
             }
         } catch (\Throwable $e) {
             // Abaikan saat setup CLI atau migrasi

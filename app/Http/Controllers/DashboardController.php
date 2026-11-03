@@ -34,13 +34,13 @@ class DashboardController extends Controller
             ];
 
             // Ambil 5 pengajuan cuti terbaru untuk tabel aktivitas
-            $recentRequests = LeaveRequest::with(['user:id,name,email,nip,department', 'leaveType:id,name,code'])
+            $recentRequests = LeaveRequest::with(['user:id,name,email,role', 'leaveType:id,name,code'])
                 ->latest()
                 ->take(5)
                 ->get();
 
             // Ambil 5 antrean teratas yang butuh persetujuan segera
-            $pendingList = LeaveRequest::with(['user:id,name,email,nip,department', 'leaveType:id,name,code'])
+            $pendingList = LeaveRequest::with(['user:id,name,email,role', 'leaveType:id,name,code'])
                 ->where('status', LeaveStatus::PENDING)
                 ->latest()
                 ->take(5)
@@ -59,7 +59,7 @@ class DashboardController extends Controller
         }
 
         // Logika data dashboard khusus untuk mitra (karyawan)
-        $balances = LeaveBalance::with('leaveType:id,name,code,default_quota,is_paid,requires_attachment')
+        $balances = LeaveBalance::with('leaveType:id,name,code,default_quota')
             ->where('user_id', $user->id)
             ->where('year', $currentYear)
             ->get();

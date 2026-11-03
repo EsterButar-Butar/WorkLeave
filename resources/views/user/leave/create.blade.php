@@ -70,7 +70,7 @@
                             </div>
                             <div class="text-left">
                                 <div class="text-sm font-semibold text-[#2D2D2D] leading-tight">{{ Auth::user()->role === \App\Enums\UserRole::ADMIN ? 'Admin' : Auth::user()->name }}</div>
-                                <div class="text-xs text-[#5D5D5D] leading-tight mt-0.5">{{ Auth::user()->role === \App\Enums\UserRole::ADMIN ? 'Admin' : (Auth::user()->position ?? 'Mitra Kerja') }}</div>
+                                <div class="text-xs text-[#5D5D5D] leading-tight mt-0.5">{{ Auth::user()->role === \App\Enums\UserRole::ADMIN ? 'Admin' : 'Mitra Kerja' }}</div>
                             </div>
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-2 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': openDropdown }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -563,6 +563,7 @@
             }
 
             const leaveTypeCode = typeSelect.value || 'ANNUAL';
+            const leaveTypeId = document.getElementById('leave_type_id_input')?.value || null;
 
             try {
                 const response = await fetch("{{ route('leave.calculate') }}", {
@@ -574,7 +575,8 @@
                     body: JSON.stringify({
                         start_date: startInput.value,
                         end_date: endInput.value,
-                        leave_type_code: leaveTypeCode
+                        leave_type_code: leaveTypeCode,
+                        leave_type_id: leaveTypeId
                     })
                 });
 
@@ -586,10 +588,11 @@
                     const isWorkDaysOnly = (leaveTypeCode === 'ANNUAL' || leaveTypeCode === 'SICK');
                     const isMaternity = (leaveTypeCode === 'MATERNITY');
                     const leaveLabel = leaveTypeCode === 'SICK' ? 'cuti sakit' : (isMaternity ? 'cuti bersalin' : 'cuti tahunan');
+                    const unitLabel = isWorkDaysOnly ? 'hari kerja' : 'hari kalender';
 
                     let badgeTitle = isWorkDaysOnly ? `${data.deducted_days} Hari Kerja` : `${data.deducted_days} Hari Kalender`;
                     if (data.is_exceeding_max_quota) {
-                        badge.innerText = `${badgeTitle} (Melebihi Kuota Max ${data.max_quota} Hari)`;
+                        badge.innerText = `${badgeTitle} (Melebihi Sisa Kuota ${data.remaining_quota} Hari)`;
                         badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200';
                     } else {
                         badge.innerText = badgeTitle;
@@ -630,16 +633,57 @@
                         holidayAlert.classList.add('hidden');
                     }
 
-                    if (data.is_exceeding_max_quota) {
+                    // Tampilkan Rincian Batas Kuota, Cuti yang Sudah Diambil, dan Sisa Kuota
+                    if (data.max_quota !== null && data.max_quota !== undefined) {
                         detailHtml += `
-                            <p class="flex items-center justify-between text-rose-600 font-semibold pt-1 border-t border-rose-100">
-                                <span>Peringatan Kuota:</span>
-                                <span>Melebihi batas maksimal ${data.max_quota} hari</span>
-                            </p>
+                            <div class="pt-2.5 mt-2 border-t border-gray-100 space-y-1.5 bg-[#FFFBFB] -mx-4 -mb-4 p-4 rounded-b-2xl border-b border-red-100/50">
+                                <div class="flex items-center justify-between text-xs text-[#5D5D5D]">
+                                    <span>Batas kuota per tahun:</span>
+                                    <span class="font-bold text-[#2D2D2D]">${data.max_quota} hari</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs text-[#5D5D5D]">
+                                    <span>Cuti yang sudah diambil:</span>
+                                    <span class="font-semibold text-amber-600">${data.used_quota} hari</span>
+                                </div>
+                                ${data.pending_quota > 0 ? `
+                                <div class="flex items-center justify-between text-xs text-amber-600">
+                                    <span>Sedang menunggu keputusan admin:</span>
+                                    <span class="font-semibold">${data.pending_quota} hari</span>
+                                </div>` : ''}
+                                <div class="flex items-center justify-between text-xs text-[#2D2D2D] pt-1.5 border-t border-gray-200/70 font-medium">
+                                    <span>Sisa kuota yang tersedia:</span>
+                                    <span class="font-bold text-emerald-600 text-sm">${data.remaining_quota} hari</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs ${data.remaining_after >= 0 ? 'text-emerald-700' : 'text-rose-600'} font-semibold pt-1 border-t border-dashed border-gray-200">
+                                    <span>Sisa kuota setelah pengajuan ini:</span>
+                                    <span class="font-bold text-sm">${data.remaining_after >= 0 ? data.remaining_after + ' hari' : 'Minus ' + Math.abs(data.remaining_after) + ' hari'}</span>
+                                </div>
+                                ${data.is_exceeding_max_quota ? `
+                                <div class="mt-2.5 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs leading-relaxed flex items-start gap-2">
+                                    <svg class="w-4 h-4 text-rose-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                    </svg>
+                                    <div>
+                                        <strong>Pengajuan Melebihi Sisa Kuota:</strong> Anda mengajukan <strong>${data.deducted_days} ${unitLabel}</strong>, sedangkan sisa kuota Anda yang tersedia hanya <strong>${data.remaining_quota} hari</strong> (dari batas kuota ${data.max_quota} hari/tahun).
+                                    </div>
+                                </div>` : ''}
+                            </div>
                         `;
                     }
 
                     details.innerHTML = detailHtml;
+
+                    // Update tombol submit
+                    const submitBtn = document.getElementById('submitLeaveBtn');
+                    if (submitBtn) {
+                        if (data.is_exceeding_max_quota) {
+                            submitBtn.disabled = true;
+                            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        } else {
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
+                    }
 
                     // Render Kartu & Warna per Tanggal (Hijau = Kerja, Oranye = Sabtu, Pink = Minggu, Merah = Libur)
                     const monthNamesIndo = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];

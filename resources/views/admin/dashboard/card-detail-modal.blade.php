@@ -62,7 +62,7 @@
                 <input type="text" 
                        id="cardModalSearchInput" 
                        oninput="searchCardModal(this.value)"
-                       placeholder="Cari nama atau NIP..." 
+                       placeholder="Cari nama atau email..." 
                        class="w-full bg-white text-xs text-[#2D2D2D] pl-8 pr-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#C12132] focus:border-[#C12132] placeholder:text-gray-400">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -89,47 +89,20 @@
 <script>
     // DATA DARI DATABASE LARAVEL DENGAN FALLBACK DEMO FIGMA LENGKAP
     @php
-        // 1. Data Pegawai Aktif
+        // 1. Data Pegawai Aktif (Murni Real Database)
         $employeeList = [];
         if (isset($dbEmployees) && $dbEmployees->count() > 0) {
             foreach ($dbEmployees as $emp) {
                 $employeeList[] = [
                     'name' => $emp->name,
-                    'nip' => $emp->nip ?? 'MTR-' . str_pad($emp->id, 3, '0', STR_PAD_LEFT),
-                    'department' => $emp->department ?? 'General Operations',
-                    'position' => $emp->position ?? 'Mitra Kerja',
                     'email' => $emp->email,
-                    'phone' => $emp->phone ?? '-',
-                    'date' => $emp->join_date ? \Carbon\Carbon::parse($emp->join_date)->translatedFormat('d M Y') : 'Aktif',
                     'tag' => 'Pegawai Aktif',
                     'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200',
                 ];
             }
         }
-        
-        $demoEmployees = [
-            ['name' => 'Budi Santoso', 'nip' => 'MTR-2024-001', 'department' => 'Technology & IT', 'position' => 'Senior Frontend Developer', 'email' => 'budi@workleave.test', 'phone' => '081298765432', 'date' => '15 Jan 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
-            ['name' => 'Siti Rahmawati', 'nip' => 'MTR-2024-002', 'department' => 'Digital Marketing', 'position' => 'Content Specialist', 'email' => 'siti@workleave.test', 'phone' => '081345678901', 'date' => '01 Mar 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
-            ['name' => 'Dimas Prasetyo', 'nip' => 'MTR-2024-003', 'department' => 'Product & Design', 'position' => 'UI/UX Designer', 'email' => 'dimas@workleave.test', 'phone' => '081456789012', 'date' => '10 Jun 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
-            ['name' => 'Ayu Pratiwi', 'nip' => 'MTR-2024-004', 'department' => 'Human Resources', 'position' => 'Recruitment Officer', 'email' => 'ayu@workleave.test', 'phone' => '081567890123', 'date' => '12 Jan 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
-            ['name' => 'Putri Wulandari', 'nip' => 'MTR-2024-005', 'department' => 'Finance & Accounting', 'position' => 'Finance Staff', 'email' => 'putri@workleave.test', 'phone' => '081678901234', 'date' => '20 Feb 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
-            ['name' => 'Yanto Nugroho', 'nip' => 'MTR-2024-006', 'department' => 'Technology & IT', 'position' => 'Backend Engineer', 'email' => 'yanto@workleave.test', 'phone' => '081789012345', 'date' => '05 Apr 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
-            ['name' => 'Yanti Kusuma', 'nip' => 'MTR-2024-007', 'department' => 'Customer Success', 'position' => 'CS Lead', 'email' => 'yanti@workleave.test', 'phone' => '081890123456', 'date' => '18 Mei 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
-            ['name' => 'Putra Pratama', 'nip' => 'MTR-2024-008', 'department' => 'Technology & IT', 'position' => 'DevOps Specialist', 'email' => 'putra@workleave.test', 'phone' => '081901234567', 'date' => '01 Jul 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
-            ['name' => 'Dani Firmansyah', 'nip' => 'MTR-2024-009', 'department' => 'Sales & Business', 'position' => 'Account Executive', 'email' => 'dani@workleave.test', 'phone' => '082112345678', 'date' => '15 Agu 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
-            ['name' => 'Titi Handayani', 'nip' => 'MTR-2024-010', 'department' => 'Product & Design', 'position' => 'Product Manager', 'email' => 'titi@workleave.test', 'phone' => '082223456789', 'date' => '01 Sep 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
-            ['name' => 'Rian Hidayat', 'nip' => 'MTR-2024-011', 'department' => 'Technology & IT', 'position' => 'Mobile Developer', 'email' => 'rian@workleave.test', 'phone' => '082334567890', 'date' => '10 Sep 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
-            ['name' => 'Maya Anggraini', 'nip' => 'MTR-2024-012', 'department' => 'Digital Marketing', 'position' => 'SEO & SEM Specialist', 'email' => 'maya@workleave.test', 'phone' => '082445678901', 'date' => '25 Sep 2024', 'tag' => 'Pegawai Aktif', 'tag_color' => 'bg-blue-50 text-blue-700 border-blue-200'],
-        ];
 
-        $existingEmails = array_column($employeeList, 'email');
-        foreach ($demoEmployees as $d) {
-            if (!in_array($d['email'], $existingEmails)) {
-                $employeeList[] = $d;
-            }
-        }
-
-        // 2. Data Cuti Disetujui
+        // 2. Data Cuti Disetujui (Murni Real Database)
         $approvedList = [];
         if (isset($dbApproved) && $dbApproved->count() > 0) {
             foreach ($dbApproved as $req) {
@@ -138,9 +111,7 @@
                     $endFmt = \Carbon\Carbon::parse($req->end_date)->format('d/m/Y');
                     $approvedList[] = [
                         'name' => $req->user->name,
-                        'nip' => $req->user->nip ?? 'MTR-' . str_pad($req->user->id, 3, '0', STR_PAD_LEFT),
-                        'department' => $req->user->department ?? 'General Operations',
-                        'position' => $req->user->position ?? 'Mitra Kerja',
+                        'email' => $req->user->email,
                         'type' => $req->leaveType->name ?? 'Cuti',
                         'period' => ($startFmt === $endFmt) ? $startFmt : ($startFmt . ' – ' . $endFmt),
                         'duration' => ($req->total_days ?? 1) . ' Hari',
@@ -152,26 +123,7 @@
             }
         }
 
-        $demoApproved = [
-            ['name' => 'Budi Santoso', 'nip' => 'MTR-2024-001', 'department' => 'Technology & IT', 'position' => 'Senior Frontend Developer', 'type' => 'Cuti Tahunan', 'period' => '11/10/2026 – 13/10/2026', 'duration' => '3 Hari', 'desc' => 'Keperluan keluarga di luar kota', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Dimas Prasetyo', 'nip' => 'MTR-2024-003', 'department' => 'Product & Design', 'position' => 'UI/UX Designer', 'type' => 'Cuti Sakit', 'period' => '17/10/2026 – 18/10/2026', 'duration' => '2 Hari', 'desc' => 'Demam dan flu berat, istirahat atas saran dokter', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Titi Handayani', 'nip' => 'MTR-2024-010', 'department' => 'Product & Design', 'position' => 'Product Manager', 'type' => 'Cuti Tahunan', 'period' => '11/10/2026 – 13/10/2026', 'duration' => '3 Hari', 'desc' => 'Acara keluarga besar di kampung halaman', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Putri Wulandari', 'nip' => 'MTR-2024-005', 'department' => 'Finance & Accounting', 'position' => 'Finance Staff', 'type' => 'Cuti Tahunan', 'period' => '11/10/2026 – 13/10/2026', 'duration' => '3 Hari', 'desc' => 'Keperluan wisuda adik kandung', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Ayu Pratiwi', 'nip' => 'MTR-2024-004', 'department' => 'Human Resources', 'position' => 'Recruitment Officer', 'type' => 'Cuti Sakit', 'period' => '05/10/2026 – 07/10/2026', 'duration' => '3 Hari', 'desc' => 'Pemeriksaan kesehatan rawat jalan', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Yanto Nugroho', 'nip' => 'MTR-2024-006', 'department' => 'Technology & IT', 'position' => 'Backend Engineer', 'type' => 'Cuti Tahunan', 'period' => '02/10/2026 – 04/10/2026', 'duration' => '3 Hari', 'desc' => 'Renovasi rumah tempat tinggal', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Yanti Kusuma', 'nip' => 'MTR-2024-007', 'department' => 'Customer Success', 'position' => 'CS Lead', 'type' => 'Cuti Menikah', 'period' => '08/10/2026 – 10/10/2026', 'duration' => '3 Hari', 'desc' => 'Pernikahan kerabat inti', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Putra Pratama', 'nip' => 'MTR-2024-008', 'department' => 'Technology & IT', 'position' => 'DevOps Specialist', 'type' => 'Cuti Tahunan', 'period' => '14/10/2026 – 15/10/2026', 'duration' => '2 Hari', 'desc' => 'Urusan sertifikasi keahlian', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-            ['name' => 'Dani Firmansyah', 'nip' => 'MTR-2024-009', 'department' => 'Sales & Business', 'position' => 'Account Executive', 'type' => 'Cuti Tahunan', 'period' => '18/10/2026 – 19/10/2026', 'duration' => '2 Hari', 'desc' => 'Keperluan perpanjangan SIM dan paspor', 'status' => 'Disetujui', 'status_color' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
-        ];
-
-        $approvedNames = array_map('strtolower', array_column($approvedList, 'name'));
-        foreach ($demoApproved as $da) {
-            if (!in_array(strtolower($da['name']), $approvedNames)) {
-                $approvedList[] = $da;
-            }
-        }
-
-        // 3. Data Pengajuan Cuti Pending
+        // 3. Data Pengajuan Cuti Pending (Murni Real Database)
         $pendingList = [];
         if (isset($dbPending) && $dbPending->count() > 0) {
             foreach ($dbPending as $req) {
@@ -180,9 +132,7 @@
                     $endFmt = \Carbon\Carbon::parse($req->end_date)->format('d/m/Y');
                     $pendingList[] = [
                         'name' => $req->user->name,
-                        'nip' => $req->user->nip ?? 'MTR-' . str_pad($req->user->id, 3, '0', STR_PAD_LEFT),
-                        'department' => $req->user->department ?? 'General Operations',
-                        'position' => $req->user->position ?? 'Mitra Kerja',
+                        'email' => $req->user->email,
                         'type' => $req->leaveType->name ?? 'Cuti',
                         'period' => ($startFmt === $endFmt) ? $startFmt : ($startFmt . ' – ' . $endFmt),
                         'duration' => ($req->total_days ?? 1) . ' Hari',
@@ -194,28 +144,7 @@
             }
         }
 
-        $demoPending = [
-            ['name' => 'Siti Rahmawati', 'nip' => 'MTR-2024-002', 'department' => 'Digital Marketing', 'position' => 'Content Specialist', 'type' => 'Cuti Tahunan', 'period' => '11/10/2026 – 13/10/2026', 'duration' => '2 Hari', 'desc' => 'Perpanjangan dokumen kependudukan dan urusan administrasi keluarga', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Budi Santoso', 'nip' => 'MTR-2024-001', 'department' => 'Technology & IT', 'position' => 'Senior Frontend Developer', 'type' => 'Cuti Tahunan', 'period' => '25/10/2026 – 26/10/2026', 'duration' => '2 Hari', 'desc' => 'Menghadiri reuni keluarga besar', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Maya Anggraini', 'nip' => 'MTR-2024-012', 'department' => 'Digital Marketing', 'position' => 'SEO & SEM Specialist', 'type' => 'Cuti Tahunan', 'period' => '22/10/2026 – 24/10/2026', 'duration' => '3 Hari', 'desc' => 'Keperluan pindah rumah baru', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Rian Hidayat', 'nip' => 'MTR-2024-011', 'department' => 'Technology & IT', 'position' => 'Mobile Developer', 'type' => 'Cuti Penting', 'period' => '23/10/2026 – 24/10/2026', 'duration' => '2 Hari', 'desc' => 'Mendampingi keluarga rawat inap', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Ayu Pratiwi', 'nip' => 'MTR-2024-004', 'department' => 'Human Resources', 'position' => 'Recruitment Officer', 'type' => 'Cuti Tahunan', 'period' => '28/10/2026 – 30/10/2026', 'duration' => '3 Hari', 'desc' => 'Libur tahunan keluarga', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Putri Wulandari', 'nip' => 'MTR-2024-005', 'department' => 'Finance & Accounting', 'position' => 'Finance Staff', 'type' => 'Cuti Tahunan', 'period' => '27/10/2026 – 28/10/2026', 'duration' => '2 Hari', 'desc' => 'Urusan perbankan & administrasi pajak', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Yanto Nugroho', 'nip' => 'MTR-2024-006', 'department' => 'Technology & IT', 'position' => 'Backend Engineer', 'type' => 'Cuti Sakit', 'period' => '21/10/2026 – 22/10/2026', 'duration' => '2 Hari', 'desc' => 'Istirahat pasca tindakan dokter gigi', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Yanti Kusuma', 'nip' => 'MTR-2024-007', 'department' => 'Customer Success', 'position' => 'CS Lead', 'type' => 'Cuti Tahunan', 'period' => '29/10/2026 – 31/10/2026', 'duration' => '3 Hari', 'desc' => 'Urusan keluarga di Jawa Barat', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Putra Pratama', 'nip' => 'MTR-2024-008', 'department' => 'Technology & IT', 'position' => 'DevOps Specialist', 'type' => 'Cuti Tahunan', 'period' => '24/10/2026 – 25/10/2026', 'duration' => '2 Hari', 'desc' => 'Menghadiri pernikahan sahabat karib', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Dani Firmansyah', 'nip' => 'MTR-2024-009', 'department' => 'Sales & Business', 'position' => 'Account Executive', 'type' => 'Cuti Tahunan', 'period' => '26/10/2026 – 27/10/2026', 'duration' => '2 Hari', 'desc' => 'Mengantar orang tua kontrol kesehatan', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-            ['name' => 'Dimas Prasetyo', 'nip' => 'MTR-2024-003', 'department' => 'Product & Design', 'position' => 'UI/UX Designer', 'type' => 'Cuti Tahunan', 'period' => '30/10/2026 – 31/10/2026', 'duration' => '2 Hari', 'desc' => 'Istirahat dan urusan perpanjangan masa sewa rumah', 'status' => 'Menunggu Keputusan', 'status_color' => 'bg-amber-50 text-amber-700 border-amber-200'],
-        ];
-
-        $pendingNames = array_map('strtolower', array_column($pendingList, 'name'));
-        foreach ($demoPending as $dp) {
-            if (!in_array(strtolower($dp['name']), $pendingNames)) {
-                $pendingList[] = $dp;
-            }
-        }
-
-        // 4. Data Cuti Ditolak
+        // 4. Data Cuti Ditolak (Murni Real Database)
         $rejectedList = [];
         if (isset($dbRejected) && $dbRejected->count() > 0) {
             foreach ($dbRejected as $req) {
@@ -224,9 +153,7 @@
                     $endFmt = \Carbon\Carbon::parse($req->end_date)->format('d/m/Y');
                     $rejectedList[] = [
                         'name' => $req->user->name,
-                        'nip' => $req->user->nip ?? 'MTR-' . str_pad($req->user->id, 3, '0', STR_PAD_LEFT),
-                        'department' => $req->user->department ?? 'General Operations',
-                        'position' => $req->user->position ?? 'Mitra Kerja',
+                        'email' => $req->user->email,
                         'type' => $req->leaveType->name ?? 'Cuti',
                         'period' => ($startFmt === $endFmt) ? $startFmt : ($startFmt . ' – ' . $endFmt),
                         'duration' => ($req->total_days ?? 1) . ' Hari',
@@ -236,18 +163,6 @@
                         'status_color' => 'bg-rose-50 text-rose-700 border-rose-200',
                     ];
                 }
-            }
-        }
-
-        $demoRejected = [
-            ['name' => 'Dimas Prasetyo', 'nip' => 'MTR-2024-003', 'department' => 'Product & Design', 'position' => 'UI/UX Designer', 'type' => 'Cuti Tahunan', 'period' => '01/10/2026 – 03/10/2026', 'duration' => '3 Hari', 'desc' => 'Liburan ke pantai bersama teman', 'reason' => 'Jadwal bertepatan dengan masa rilis sprint project MBKM.', 'status' => 'Ditolak', 'status_color' => 'bg-rose-50 text-rose-700 border-rose-200'],
-            ['name' => 'Dani Firmansyah', 'nip' => 'MTR-2024-009', 'department' => 'Sales & Business', 'position' => 'Account Executive', 'type' => 'Cuti Tahunan', 'period' => '05/10/2026 – 08/10/2026', 'duration' => '4 Hari', 'desc' => 'Cuti mendadak ke luar pulau', 'reason' => 'Target closing akhir kuartal dan tim sales sedang kekurangan personil on-site.', 'status' => 'Ditolak', 'status_color' => 'bg-rose-50 text-rose-700 border-rose-200'],
-        ];
-
-        $rejectedNames = array_map('strtolower', array_column($rejectedList, 'name'));
-        foreach ($demoRejected as $dr) {
-            if (!in_array(strtolower($dr['name']), $rejectedNames)) {
-                $rejectedList[] = $dr;
             }
         }
     @endphp
@@ -284,12 +199,12 @@
         }
     };
 
-    let currentCardType = 'total_pegawai';
+    let currentCardType = 'disetujui';
     let currentFilterText = '';
 
     /** Buka Modal berdasarkan jenis kartu */
     function openCardModal(type) {
-        currentCardType = type || 'total_pegawai';
+        currentCardType = (type && type !== 'total_pegawai') ? type : 'disetujui';
         currentFilterText = '';
 
         const searchInput = document.getElementById('cardModalSearchInput');
@@ -380,10 +295,9 @@
         if (currentFilterText) {
             filtered = config.data.filter(item => {
                 const name = (item.name || '').toLowerCase();
-                const nip = (item.nip || '').toLowerCase();
-                const dept = (item.department || '').toLowerCase();
+                const email = (item.email || '').toLowerCase();
                 const desc = (item.desc || '').toLowerCase();
-                return name.includes(currentFilterText) || nip.includes(currentFilterText) || dept.includes(currentFilterText) || desc.includes(currentFilterText);
+                return name.includes(currentFilterText) || email.includes(currentFilterText) || desc.includes(currentFilterText);
             });
         }
 
@@ -418,12 +332,9 @@
                         <div class="min-w-0">
                             <div class="flex items-center gap-2">
                                 <h4 class="text-sm font-bold text-[#2D2D2D] truncate">${item.name}</h4>
-                                <span class="text-[11px] text-gray-400 font-mono">(${item.nip})</span>
                             </div>
                             <p class="text-xs text-[#5D5D5D] mt-0.5 truncate">
-                                <span>${item.position}</span>
-                                <span class="mx-1.5">•</span>
-                                <span class="text-gray-400">${item.department}</span>
+                                <span>${item.email || 'Mitra Kerja'}</span>
                             </p>
                             ${item.desc ? `
                                 <p class="text-[11px] text-[#8C8C8C] mt-1 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100 line-clamp-1">
@@ -443,8 +354,7 @@
                             <span class="text-xs font-bold text-[#2D2D2D]">${item.type} <span class="text-xs font-normal text-gray-500">(${item.duration})</span></span>
                             <span class="text-[11px] text-[#8C8C8C]">${item.period}</span>
                         ` : `
-                            <span class="text-xs font-bold text-[#2D2D2D]">${item.phone}</span>
-                            <span class="text-[11px] text-[#8C8C8C]">${item.email}</span>
+                            <span class="text-[11px] text-[#8C8C8C]">Mitra Kerja</span>
                         `}
                         
                         <div class="mt-1">

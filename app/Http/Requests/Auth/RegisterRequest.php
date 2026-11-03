@@ -6,17 +6,13 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class RegisterRequest extends FormRequest
 {
-    /**
-     * Tentukan apakah pengguna diizinkan untuk membuat request ini.
-     */
+    // Otorisasi apakah pengguna diizinkan melakukan request ini
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Dapatkan aturan validasi untuk pendaftaran pengguna.
-     */
+    // Aturan validasi input untuk pendaftaran pengguna baru
     public function rules(): array
     {
         return [
@@ -26,9 +22,7 @@ class RegisterRequest extends FormRequest
         ];
     }
 
-    /**
-     * Pesan validasi kustom dalam Bahasa Indonesia.
-     */
+    // Pesan kustom validasi dalam bahasa Indonesia
     public function messages(): array
     {
         return [

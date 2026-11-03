@@ -56,6 +56,19 @@ class LeaveBalanceService
             $balance->save();
         }
 
+        // Sinkronkan used_quota dengan total cuti yang disetujui (APPROVED) jika ada
+        $approvedDays = (int) \App\Models\LeaveRequest::where('user_id', $user->id)
+            ->where('leave_type_id', $leaveType->id)
+            ->whereYear('start_date', $year)
+            ->where('status', \App\Enums\LeaveStatus::APPROVED)
+            ->sum('total_days');
+
+        if ($approvedDays > $balance->used_quota) {
+            $balance->used_quota = $approvedDays;
+            $balance->remaining_quota = max(0, $balance->initial_quota - $balance->used_quota);
+            $balance->save();
+        }
+
         return $balance;
     }
 

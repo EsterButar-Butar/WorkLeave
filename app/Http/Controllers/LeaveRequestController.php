@@ -33,7 +33,7 @@ class LeaveRequestController extends Controller
             $query->where('user_id', $user->id);
         } else {
             // Jika admin, sertakan juga identitas pemohon cuti
-            $query->with('user:id,name,email,nip,department,position');
+            $query->with('user:id,name,email,role');
         }
 
         // Filter berdasarkan status jika ada parameter pencarian
@@ -189,7 +189,7 @@ class LeaveRequestController extends Controller
         }
 
         // Muat relasi lengkap data user, jenis cuti, dan riwayat approval admin
-        $leaveRequest->load(['user:id,name,email,nip,department,position', 'leaveType', 'approver:id,name', 'approvals.admin:id,name']);
+        $leaveRequest->load(['user:id,name,email,role', 'leaveType', 'approver:id,name', 'approvals.admin:id,name']);
 
         return response()->json([
             'status' => 'success',
@@ -217,9 +217,20 @@ class LeaveRequestController extends Controller
         }
     }
 
-    // Hitung otomatis durasi hari kerja efektif, tanggal merah, dan akhir pekan
+    // Hitung otomatis durasi hari kerja efektif, tanggal merah, akhir pekan, dan sisa kuota riil pengguna
     public function calculateDays(Request $request, \App\Services\HolidayService $holidayService): JsonResponse
     {
+        // Selaraskan payload jika frontend mengirimkan nama parameter alternatif
+        if (!$request->has('start_date') && $request->has('tanggal_mulai')) {
+            $request->merge(['start_date' => $request->input('tanggal_mulai')]);
+        }
+        if (!$request->has('end_date') && $request->has('tanggal_selesai')) {
+            $request->merge(['end_date' => $request->input('tanggal_selesai')]);
+        }
+        if (!$request->has('leave_type_code') && $request->has('leave_type')) {
+            $request->merge(['leave_type_code' => $request->input('leave_type')]);
+        }
+
         // Validasi input tanggal mulai dan tanggal selesai
         $request->validate([
             'start_date' => 'required|date',
@@ -228,21 +239,89 @@ class LeaveRequestController extends Controller
             'leave_type_id' => 'nullable',
         ]);
 
-        // Tentukan kode jenis cuti (default ANNUAL/Cuti Tahunan)
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $year = (int) \Carbon\Carbon::parse($startDate)->format('Y');
+
+        // Tentukan jenis cuti (default ANNUAL/Cuti Tahunan)
         $leaveTypeCode = $request->input('leave_type_code', 'ANNUAL');
+        $leaveType = null;
         if ($leaveTypeId = $request->input('leave_type_id')) {
-            $type = LeaveType::find($leaveTypeId);
-            if ($type) {
-                $leaveTypeCode = $type->code;
+            $leaveType = LeaveType::find($leaveTypeId);
+            if ($leaveType) {
+                $leaveTypeCode = $leaveType->code;
             }
+        }
+        if (!$leaveType && $leaveTypeCode) {
+            $leaveType = LeaveType::where('code', strtoupper($leaveTypeCode))->first();
         }
 
         // Panggil service tanggal libur untuk hitung hari kerja aktif
-        $result = $holidayService->calculateDays(
-            $request->input('start_date'),
-            $request->input('end_date'),
-            $leaveTypeCode
-        );
+        $result = $holidayService->calculateDays($startDate, $endDate, $leaveTypeCode);
+
+        // Ambil kuota dan riwayat cuti pengguna yang sedang login
+        $user = $request->user();
+        $typeUpper = strtoupper($leaveTypeCode);
+
+        // Batas maksimal kuota per tahun
+        $maxQuota = $leaveType ? (int) $leaveType->default_quota : match ($typeUpper) {
+            'ANNUAL' => 12,
+            'SICK' => 7,
+            'MATERNITY' => 90,
+            default => 12,
+        };
+
+        $usedQuota = 0;
+        $pendingQuota = 0;
+
+        if ($user && $leaveType) {
+            // Ambil dari LeaveBalance jika ada record tersimpan
+            $balance = \App\Models\LeaveBalance::where('user_id', $user->id)
+                ->where('leave_type_id', $leaveType->id)
+                ->where('year', $year)
+                ->first();
+
+            if ($balance && $balance->initial_quota > 0) {
+                $maxQuota = (int) $balance->initial_quota;
+            }
+
+            // Hitung hari cuti yang sudah disetujui (APPROVED) di tahun ini
+            $approvedDays = (int) LeaveRequest::where('user_id', $user->id)
+                ->where('leave_type_id', $leaveType->id)
+                ->whereYear('start_date', $year)
+                ->where('status', \App\Enums\LeaveStatus::APPROVED)
+                ->sum('total_days');
+
+            $usedQuota = $balance ? max((int) $balance->used_quota, $approvedDays) : $approvedDays;
+
+            // Hitung juga pengajuan yang sedang menunggu persetujuan (PENDING)
+            $pendingQuota = (int) LeaveRequest::where('user_id', $user->id)
+                ->where('leave_type_id', $leaveType->id)
+                ->whereYear('start_date', $year)
+                ->where('status', \App\Enums\LeaveStatus::PENDING)
+                ->sum('total_days');
+        }
+
+        // Sisa kuota yang tersedia saat ini (sebelum pengajuan baru ini)
+        $remainingQuota = max(0, $maxQuota - $usedQuota);
+
+        // Hari yang akan dipotong pada pengajuan saat ini
+        $deductedDays = (int) ($result['deducted_days'] ?? 0);
+
+        // Sisa kuota setelah pengajuan ini
+        $remainingAfter = $remainingQuota - $deductedDays;
+
+        // Apakah pengajuan melebihi sisa kuota yang tersedia?
+        $isExceeding = ($maxQuota > 0 && $deductedDays > $remainingQuota);
+
+        $result['max_quota'] = $maxQuota;
+        $result['used_quota'] = $usedQuota;
+        $result['pending_quota'] = $pendingQuota;
+        $result['remaining_quota'] = $remainingQuota;
+        $result['remaining_after'] = $remainingAfter;
+        $result['is_exceeding_max_quota'] = $isExceeding;
+        $result['quota_year'] = $year;
+        $result['leave_type_name'] = $leaveType?->name ?? 'Cuti';
 
         return response()->json([
             'status' => 'success',

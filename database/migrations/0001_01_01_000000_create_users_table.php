@@ -6,9 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    // Jalankan migrasi pembuatan tabel
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
@@ -18,13 +16,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('role')->default('mitra'); // 'admin' atau 'mitra'
-            $table->string('nip')->nullable()->unique();
-            $table->string('phone')->nullable();
-            $table->string('department')->nullable();
-            $table->string('position')->nullable();
-            $table->date('join_date')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->rememberToken();
             $table->timestamps();
         });
 
@@ -44,9 +36,7 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    // Batalkan migrasi dan hapus tabel
     public function down(): void
     {
         Schema::dropIfExists('users');

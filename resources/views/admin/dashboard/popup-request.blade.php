@@ -11,34 +11,37 @@
         $usedQuota = $userBalance->used_quota ?? 0;
         $maxQuota = $userBalance->initial_quota ?? ($latestPending->leaveType->default_quota ?? 12);
         
+        $applicantName = $latestPending->user->name ?? 'Pegawai';
         $startDateFmt = \Carbon\Carbon::parse($latestPending->start_date)->translatedFormat('d M Y');
         $endDateFmt = \Carbon\Carbon::parse($latestPending->end_date)->translatedFormat('d M Y');
         $periodFmt = ($latestPending->start_date === $latestPending->end_date)
             ? $startDateFmt
             : ($startDateFmt . ' – ' . $endDateFmt);
         
+        $startShort = \Carbon\Carbon::parse($latestPending->start_date)->format('d/m/Y');
+        $endShort = \Carbon\Carbon::parse($latestPending->end_date)->format('d/m/Y');
+        $periodShort = ($startShort === $endShort) ? $startShort : ($startShort . ' – ' . $endShort);
+        
         $timeAgo = $latestPending->created_at ? $latestPending->created_at->diffForHumans() : 'Baru saja';
         $attachmentName = $latestPending->attachment_path ? basename($latestPending->attachment_path) : null;
     }
 @endphp
 
-<!-- TOMBOL BUKA KEMBALI NOTIFIKASI -->
-<button type="button" id="reopenNotificationBtn" onclick="openLeaveNotification()"
-        class="{{ $latestPending ? 'hidden' : 'flex' }} items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-md hover:border-red-100 transition-all text-xs font-semibold text-[#2D2D2D] cursor-pointer group">
-    <div class="w-7 h-7 rounded-lg {{ $pendingCount > 0 ? 'bg-[#FFF9EB] text-[#D97706]' : 'bg-gray-100 text-gray-400' }} flex items-center justify-center group-hover:scale-110 transition-transform">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 {{ $pendingCount > 0 ? 'text-[#EAB308]' : 'text-gray-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-        </svg>
-    </div>
-    <span class="font-bold {{ $pendingCount > 0 ? 'text-[#C12132]' : 'text-[#5D5D5D]' }}">
-        {{ $pendingCount > 0 ? 'Pengajuan Cuti (' . $pendingCount . ')' : 'Tidak Ada Cuti Masuk' }}
-    </span>
-    @if ($pendingCount > 0)
-        <span class="w-2 h-2 rounded-full bg-[#EAB308] animate-pulse"></span>
-    @endif
-</button>
-
 @if ($latestPending)
+    <!-- TOMBOL BUKA KEMBALI NOTIFIKASI (Hanya jika ada permohonan pending dan sempat ditutup manual) -->
+    <button type="button" id="reopenNotificationBtn" onclick="openLeaveNotification()"
+            class="hidden items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-md hover:border-red-100 transition-all text-xs font-semibold text-[#2D2D2D] cursor-pointer group">
+        <div class="w-7 h-7 rounded-lg bg-[#FFF9EB] text-[#D97706] flex items-center justify-center group-hover:scale-110 transition-transform">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-[#EAB308]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+            </svg>
+        </div>
+        <span class="font-bold text-[#C12132]">
+            Pengajuan Cuti ({{ $pendingCount }})
+        </span>
+        <span class="w-2 h-2 rounded-full bg-[#EAB308] animate-pulse"></span>
+    </button>
+
     <!-- CARD NOTIFIKASI PENGAJUAN CUTI REAL DARI MITRA -->
     <div id="leaveRequestPopup" 
          class="w-full sm:w-[470px] bg-white rounded-3xl p-5 sm:p-6 shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-gray-100 transition-all duration-300 relative text-[#2D2D2D]">
@@ -102,7 +105,7 @@
             <!-- Pemohon -->
             <div class="grid grid-cols-[130px_1fr] items-center gap-2">
                 <span class="text-[#5D5D5D]">Nama Pemohon</span>
-                <span class="font-bold text-[#2D2D2D]">{{ $latestPending->user->name }} ({{ $latestPending->user->nip ?? 'Mitra' }})</span>
+                <span class="font-bold text-[#2D2D2D]">{{ $latestPending->user->name }}</span>
             </div>
 
             <!-- Jenis Cuti -->
@@ -169,7 +172,7 @@
             </button>
 
             <!-- Tunda (Kuning) -->
-            <button type="button" onclick="closeLeaveNotification()"
+            <button type="button" onclick="handleTundaAction()"
                     class="w-full py-2.5 rounded-xl bg-[#FEF9E7] hover:bg-[#fdf0cc] text-[#D97706] font-bold text-xs transition-colors shadow-xs text-center cursor-pointer">
                 Tunda
             </button>
@@ -209,6 +212,15 @@
 <script>
     let currentPendingRequestId = "{{ $latestPending->id ?? '' }}";
     let activeRejectId = null;
+    const currentApplicantName = @json($latestPending->user->name ?? '');
+    const currentApplicantPeriod = @json($periodShort ?? '');
+
+    function handleTundaAction() {
+        closeLeaveNotification();
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('tunda', currentApplicantName, currentApplicantPeriod);
+        }
+    }
 
     function togglePopupDetails() {
         const details = document.getElementById('popupDetailsExpanded');
@@ -264,10 +276,15 @@
 
             const result = await response.json();
             if (response.ok && result.status === 'success') {
+                sessionStorage.setItem('workleave_toast', JSON.stringify({
+                    action: 'setujui',
+                    name: currentApplicantName,
+                    period: currentApplicantPeriod
+                }));
                 if (typeof showToastNotification === 'function') {
-                    showToastNotification('setujui');
+                    showToastNotification('setujui', currentApplicantName, currentApplicantPeriod);
                 }
-                setTimeout(() => window.location.reload(), 800);
+                setTimeout(() => window.location.reload(), 600);
             } else {
                 alert(result.message || 'Gagal menyetujui cuti.');
                 if (btn) btn.innerText = 'Setujui';
@@ -323,10 +340,15 @@
             const result = await response.json();
             if (response.ok && result.status === 'success') {
                 closeRejectModal();
+                sessionStorage.setItem('workleave_toast', JSON.stringify({
+                    action: 'tolak',
+                    name: currentApplicantName,
+                    period: currentApplicantPeriod
+                }));
                 if (typeof showToastNotification === 'function') {
-                    showToastNotification('tolak');
+                    showToastNotification('tolak', currentApplicantName, currentApplicantPeriod);
                 }
-                setTimeout(() => window.location.reload(), 800);
+                setTimeout(() => window.location.reload(), 600);
             } else {
                 alert(result.message || 'Gagal menolak cuti.');
                 if (btn) btn.innerText = 'Tolak Cuti';
@@ -347,8 +369,9 @@
             if (res.ok) {
                 const json = await res.json();
                 const latestId = json.data && json.data.length > 0 ? String(json.data[0].id) : '';
-                // Jika ID pengajuan cuti pending terbaru berbeda dari yang sedang tampil, refresh dashboard otomatis
-                if (latestId !== String(currentPendingRequestId) && (latestId !== '' || currentPendingRequestId !== '')) {
+                const newCount = json.count ?? 0;
+                // Jika ID pengajuan cuti pending atau jumlah pending berubah, refresh dashboard otomatis
+                if (latestId !== String(currentPendingRequestId) || (currentPendingRequestId === '' && newCount > 0)) {
                     window.location.reload();
                 }
             }

@@ -7,17 +7,13 @@ use Carbon\CarbonPeriod;
 
 class HolidayService
 {
-    /**
-     * Cek apakah sebuah tanggal adalah hari akhir pekan (Sabtu atau Minggu).
-     */
+    // Cek apakah tanggal merupakan hari akhir pekan (Sabtu atau Minggu)
     public function isWeekend(Carbon|string $date): bool
     {
         return Carbon::parse($date)->isWeekend();
     }
 
-    /**
-     * Cek apakah sebuah tanggal adalah hari libur nasional Indonesia.
-     */
+    // Cek apakah tanggal merupakan hari libur nasional Indonesia
     public function isNationalHoliday(Carbon|string $date): bool
     {
         $cDate = Carbon::parse($date);
@@ -35,9 +31,7 @@ class HolidayService
         return $this->getFallbackHolidayName($cDate) !== null;
     }
 
-    /**
-     * Dapatkan nama hari libur nasional Indonesia.
-     */
+    // Ambil nama hari libur nasional Indonesia
     public function getHolidayName(Carbon|string $date): ?string
     {
         $cDate = Carbon::parse($date);
@@ -56,9 +50,7 @@ class HolidayService
         return $this->getFallbackHolidayName($cDate);
     }
 
-    /**
-     * Cek apakah hari kerja aktif (Senin-Jumat dan bukan tanggal merah nasional).
-     */
+    // Cek apakah hari kerja aktif (Senin-Jumat dan bukan tanggal merah nasional)
     public function isWorkingDay(Carbon|string $date): bool
     {
         $cDate = Carbon::parse($date);
@@ -74,10 +66,7 @@ class HolidayService
         return true;
     }
 
-    /**
-     * Hitung kalkulasi pemotongan kuota cuti antara dua tanggal.
-     * Untuk Cuti Tahunan (ANNUAL): Akhir pekan & hari libur nasional tidak memotong kuota.
-     */
+    // Hitung kalkulasi pemotongan kuota cuti antara dua tanggal (melewati akhir pekan & hari libur untuk cuti tahunan)
     public function calculateDays(Carbon|string $startDate, Carbon|string $endDate, string $leaveTypeCode = 'ANNUAL'): array
     {
         $start = Carbon::parse($startDate)->startOfDay();
@@ -176,9 +165,7 @@ class HolidayService
         ];
     }
 
-    /**
-     * Terjemahkan nama hari ke Bahasa Indonesia.
-     */
+    // Terjemahkan nama hari ke Bahasa Indonesia
     protected function translateDayName(string $dayName): string
     {
         return match ($dayName) {
@@ -193,9 +180,7 @@ class HolidayService
         };
     }
 
-    /**
-     * Fallback database hari libur nasional Indonesia (life-time).
-     */
+    // Fallback database hari libur nasional Indonesia (life-time)
     protected function getFallbackHolidayName(Carbon $date): ?string
     {
         $mDate = $date->format('m-d');
@@ -307,9 +292,7 @@ class HolidayService
         return $skbHolidays[$fullDate] ?? null;
     }
 
-    /**
-     * Hitung tanggal Paskah (Easter Sunday) menggunakan algoritma Butcher's Computus.
-     */
+    // Hitung tanggal Paskah (Easter Sunday) menggunakan algoritma Butcher's Computus
     protected function calculateEasterDate(int $year): ?Carbon
     {
         $a = $year % 19;

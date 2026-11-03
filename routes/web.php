@@ -60,16 +60,17 @@ Route::middleware(['auth', 'role:mitra'])->group(function () {
     // Proses submit permohonan cuti baru
     Route::post('/leave/store', [LeaveRequestController::class, 'store'])->name('leave.store');
     Route::post('/leave/create', [LeaveRequestController::class, 'store'])->name('leave.create.post');
+    Route::post('/leave', [LeaveRequestController::class, 'store'])->name('leave.post');
 
     // Hitung otomatis hari kerja dan libur nasional via API internal
-    Route::post('/leave/calculate-days', [LeaveRequestController::class, 'calculateDays'])->name('leave.calculate');
+    Route::match(['get', 'post'], '/leave/calculate-days', [LeaveRequestController::class, 'calculateDays'])->name('leave.calculate');
 
     // Halaman daftar riwayat pengajuan cuti mitra
     Route::get('/leave/history', [LeaveRequestController::class, 'history'])->name('leave.history');
-
-    // Unduh lampiran pengajuan cuti
-    Route::get('/leave/attachment/{leaveRequest}', [LeaveRequestController::class, 'downloadAttachment'])->name('leave.attachment');
 });
+
+// Unduh lampiran pengajuan cuti (dapat diakses oleh mitra pemilik maupun admin terautentikasi)
+Route::middleware('auth')->get('/leave/attachment/{leaveRequest}', [LeaveRequestController::class, 'downloadAttachment'])->name('leave.attachment');
 
 // Grup route khusus halaman administrator (Terautentikasi & Role Admin)
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
@@ -85,6 +86,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // Proses persetujuan dan penolakan cuti mitra
     Route::post('/approvals/{leaveRequest}/approve', [\App\Http\Controllers\Admin\LeaveApprovalController::class, 'approve'])->name('admin.approvals.approve');
     Route::post('/approvals/{leaveRequest}/reject', [\App\Http\Controllers\Admin\LeaveApprovalController::class, 'reject'])->name('admin.approvals.reject');
+    Route::post('/leave/{leaveRequest}/approve', [\App\Http\Controllers\Admin\LeaveApprovalController::class, 'approve']);
+    Route::post('/leave/{leaveRequest}/reject', [\App\Http\Controllers\Admin\LeaveApprovalController::class, 'reject']);
 
     // Halaman daftar persetujuan (approval) cuti mitra
     Route::get('/approvals', function () {

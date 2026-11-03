@@ -10,29 +10,28 @@ class LeaveType extends Model
 {
     use HasFactory;
 
+    // Atribut jenis cuti yang dapat diisi secara mass-assignment
     protected $fillable = [
         'name',
         'code',
         'default_quota',
-        'is_paid',
-        'requires_attachment',
-        'description',
     ];
 
+    // Casting jatah kuota default ke tipe data integer
     protected function casts(): array
     {
         return [
             'default_quota' => 'integer',
-            'is_paid' => 'boolean',
-            'requires_attachment' => 'boolean',
         ];
     }
 
+    // Relasi ke tabel saldo kuota cuti milik seluruh user
     public function leaveBalances(): HasMany
     {
         return $this->hasMany(LeaveBalance::class);
     }
 
+    // Relasi ke riwayat daftar pengajuan cuti dengan jenis ini
     public function leaveRequests(): HasMany
     {
         return $this->hasMany(LeaveRequest::class);

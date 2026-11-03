@@ -12,88 +12,62 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    // Nonaktifkan remember_token karena kolom tersebut tidak digunakan di database
+    protected $rememberTokenName = '';
+
+    // Atribut model yang dapat diisi secara mass-assignment
     protected $fillable = [
         'name',
         'email',
+        'email_verified_at',
         'password',
         'role',
-        'nip',
-        'phone',
-        'department',
-        'position',
-        'join_date',
         'is_active',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    // Atribut yang disembunyikan saat serialisasi data
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    // Definisi casting tipe data atribut model
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
-            'join_date' => 'date',
             'is_active' => 'boolean',
         ];
     }
 
-    /**
-     * Cek apakah user adalah Admin
-     */
+    // Cek apakah user memiliki hak akses Administrator
     public function isAdmin(): bool
     {
         return $this->role === UserRole::ADMIN;
     }
 
-    /**
-     * Cek apakah user adalah Mitra Kerja
-     */
+    // Cek apakah user adalah Pegawai / Mitra Kerja
     public function isMitra(): bool
     {
         return $this->role === UserRole::MITRA;
     }
 
-    /**
-     * Relasi ke data kuota cuti
-     */
+    // Relasi ke data kuota cuti pegawai
     public function leaveBalances(): HasMany
     {
         return $this->hasMany(LeaveBalance::class);
     }
 
-    /**
-     * Relasi ke pengajuan cuti yang diajukan oleh user ini
-     */
+    // Relasi ke seluruh pengajuan cuti yang diajukan oleh user ini
     public function leaveRequests(): HasMany
     {
         return $this->hasMany(LeaveRequest::class);
     }
 
-    /**
-     * Relasi ke pengajuan cuti yang disetujui/ditolak oleh user ini (jika admin)
-     */
+    // Relasi ke pengajuan cuti yang diproses oleh user ini (sebagai admin)
     public function approvedRequests(): HasMany
     {
         return $this->hasMany(LeaveRequest::class, 'approved_by');

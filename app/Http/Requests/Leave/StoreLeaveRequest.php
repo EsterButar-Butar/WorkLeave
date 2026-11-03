@@ -62,9 +62,21 @@ class StoreLeaveRequest extends FormRequest
             ]);
         }
 
-        // Dukung nama field upload file_pendukung dari form prototype
-        if (!$this->hasFile('attachment') && $this->hasFile('file_pendukung')) {
-            $this->files->set('attachment', $this->file('file_pendukung'));
+        // Selaraskan field alasan / keterangan cuti dari form FE
+        if (!$this->has('reason') || empty($this->input('reason'))) {
+            $altReason = $this->input('keterangan') ?? $this->input('alasan');
+            if ($altReason !== null) {
+                $this->merge(['reason' => $altReason]);
+            }
+        }
+
+        // Dukung nama field upload file_pendukung atau lampiran dari form prototype FE
+        if (!$this->hasFile('attachment')) {
+            if ($this->hasFile('file_pendukung')) {
+                $this->files->set('attachment', $this->file('file_pendukung'));
+            } elseif ($this->hasFile('lampiran')) {
+                $this->files->set('attachment', $this->file('lampiran'));
+            }
         }
     }
 
@@ -76,7 +88,6 @@ class StoreLeaveRequest extends FormRequest
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'reason' => ['required', 'string', 'min:5', 'max:1000'],
             'attachment' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'], // Maks 2MB
-            'emergency_contact' => ['nullable', 'string', 'max:20'],
         ];
     }
 

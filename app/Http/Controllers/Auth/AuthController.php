@@ -27,7 +27,6 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'role' => UserRole::MITRA,
             'is_active' => true,
-            'join_date' => now()->toDateString(),
             'email_verified_at' => null, // Belum diverifikasi saat pendaftaran
         ]);
 
@@ -79,7 +78,6 @@ class AuthController extends Controller
     public function login(LoginRequest $request): JsonResponse|RedirectResponse
     {
         $credentials = $request->only('email', 'password');
-        $remember = $request->boolean('remember');
 
         // Pastikan akun admin bawaan selalu sinkron dan bernama Admin
         if ($credentials['email'] === 'admin@workleave.test') {
@@ -87,7 +85,6 @@ class AuthController extends Controller
             $allowedPass = in_array($credentials['password'], ['password', 'admin', 'admin123']);
             if ($adminUser) {
                 $adminUser->name = 'Admin';
-                $adminUser->position = 'Admin';
                 if ($allowedPass) {
                     $adminUser->password = Hash::make($credentials['password']);
                 }
@@ -101,10 +98,6 @@ class AuthController extends Controller
                     'email' => 'admin@workleave.test',
                     'password' => Hash::make($credentials['password'] ?: 'password'),
                     'role' => UserRole::ADMIN,
-                    'nip' => 'ADM-001',
-                    'department' => 'Human Capital',
-                    'position' => 'Admin',
-                    'join_date' => '2022-01-01',
                     'is_active' => true,
                     'email_verified_at' => now(),
                 ]);
@@ -112,7 +105,7 @@ class AuthController extends Controller
         }
 
         // Cek kecocokan email dan kata sandi pengguna
-        if (Auth::attempt($credentials, $remember)) {
+        if (Auth::attempt($credentials, false)) {
             $user = Auth::user();
 
             // Cegah login jika email belum diverifikasi
@@ -166,9 +159,6 @@ class AuthController extends Controller
                             'email' => $user->email,
                             'role' => $user->role->value,
                             'role_label' => $user->role->label(),
-                            'nip' => $user->nip,
-                            'department' => $user->department,
-                            'position' => $user->position,
                         ],
                     ],
                 ]);
@@ -275,10 +265,6 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->role->value,
                 'role_label' => $user->role->label(),
-                'nip' => $user->nip,
-                'department' => $user->department,
-                'position' => $user->position,
-                'join_date' => $user->join_date?->toDateString(),
             ],
         ]);
     }

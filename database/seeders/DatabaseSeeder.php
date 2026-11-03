@@ -6,9 +6,7 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
+    // Jalankan seluruh seeder database aplikasi
     public function run(): void
     {
         $this->call([

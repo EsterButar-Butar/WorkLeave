@@ -10,6 +10,7 @@ class LeaveBalance extends Model
 {
     use HasFactory;
 
+    // Atribut kuota cuti pegawai yang dapat diisi secara massal
     protected $fillable = [
         'user_id',
         'leave_type_id',
@@ -19,6 +20,7 @@ class LeaveBalance extends Model
         'remaining_quota',
     ];
 
+    // Casting tipe data numerik integer untuk kuota cuti
     protected function casts(): array
     {
         return [
@@ -29,11 +31,13 @@ class LeaveBalance extends Model
         ];
     }
 
+    // Relasi kepemilikan kuota ke data pengguna / mitra
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    // Relasi kategori jenis cuti (tahunan, bersalin, sakit)
     public function leaveType(): BelongsTo
     {
         return $this->belongsTo(LeaveType::class);

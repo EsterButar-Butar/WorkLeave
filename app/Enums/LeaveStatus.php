@@ -2,6 +2,7 @@
 
 namespace App\Enums;
 
+// Status alur permohonan cuti pegawai
 enum LeaveStatus: string
 {
     case PENDING = 'pending';
@@ -9,6 +10,7 @@ enum LeaveStatus: string
     case REJECTED = 'rejected';
     case CANCELLED = 'cancelled';
 
+    // Label teks status dalam bahasa Indonesia untuk tampilan antarmuka
     public function label(): string
     {
         return match ($this) {
@@ -19,6 +21,7 @@ enum LeaveStatus: string
         };
     }
 
+    // Kelas styling badge warna Tailwind CSS berdasarkan status cuti
     public function badgeClass(): string
     {
         return match ($this) {

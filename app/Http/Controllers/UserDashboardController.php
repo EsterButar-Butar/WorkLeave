@@ -11,9 +11,7 @@ use Illuminate\View\View;
 
 class UserDashboardController extends Controller
 {
-    /**
-     * Tampilkan halaman utama dashboard pegawai / mitra.
-     */
+    // Tampilkan halaman utama dashboard pegawai / mitra
     public function index(Request $request): View|\Illuminate\Http\RedirectResponse
     {
         $user = $request->user();
@@ -61,6 +59,13 @@ class UserDashboardController extends Controller
             ->where('status', LeaveStatus::PENDING)
             ->count();
 
-        return view('user.dashboard.index', compact('balances', 'recentRequests', 'pendingCount', 'user'));
+        // Ambil notifikasi pengajuan cuti milik user (diurutkan dari aktivitas terbaru)
+        $userNotifications = LeaveRequest::with('leaveType')
+            ->where('user_id', $user->id)
+            ->latest('updated_at')
+            ->take(5)
+            ->get();
+
+        return view('user.dashboard.index', compact('balances', 'recentRequests', 'pendingCount', 'user', 'userNotifications'));
     }
 }

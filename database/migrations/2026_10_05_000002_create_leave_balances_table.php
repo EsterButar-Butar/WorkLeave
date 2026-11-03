@@ -6,9 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    // Jalankan migrasi pembuatan tabel
     public function up(): void
     {
         Schema::create('leave_balances', function (Blueprint $table) {
@@ -26,9 +24,7 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    // Batalkan migrasi dan hapus tabel
     public function down(): void
     {
         Schema::dropIfExists('leave_balances');

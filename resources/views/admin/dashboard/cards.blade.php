@@ -1,22 +1,22 @@
 @php
     // =========================================================================
-    // 1. DATA REAL DARI DATABASE
+    // DATA MURNI 100% REAL DATABASE (TIDAK ADA DUMMY)
     // =========================================================================
 
-    // A. Real Pegawai Aktif (dari $dbEmployees)
-    $realEmployees = [];
+    // A. Pegawai Aktif (Real dari registrasi user dengan role mitra)
+    $finalEmployees = [];
     if (isset($dbEmployees) && $dbEmployees->count() > 0) {
         foreach ($dbEmployees as $emp) {
-            $realEmployees[] = [
+            $finalEmployees[] = [
                 'name' => $emp->name,
-                'subtitle' => ($emp->position ?? 'Mitra Kerja') . ' • ' . ($emp->department ?? 'General Operations'),
+                'subtitle' => $emp->email ?? 'Mitra Kerja',
                 'is_real' => true,
             ];
         }
     }
 
-    // B. Real Cuti Disetujui (dari $dbApproved)
-    $realApproved = [];
+    // B. Cuti Disetujui (Bulan ini atau periode aktif)
+    $finalApproved = [];
     if (isset($dbApproved) && $dbApproved->count() > 0) {
         foreach ($dbApproved as $req) {
             if ($req->user) {
@@ -24,7 +24,7 @@
                 $endFmt = \Carbon\Carbon::parse($req->end_date)->format('d/m/Y');
                 $period = ($startFmt === $endFmt) ? $startFmt : ($startFmt . ' – ' . $endFmt);
                 $type = $req->leaveType->name ?? 'Cuti';
-                $realApproved[] = [
+                $finalApproved[] = [
                     'name' => $req->user->name,
                     'subtitle' => $type . ' (' . ($req->total_days ?? 1) . ' hari) • ' . $period,
                     'is_real' => true,
@@ -33,8 +33,8 @@
         }
     }
 
-    // C. Real Pengajuan Cuti Pending (dari $dbPending)
-    $realPending = [];
+    // C. Pengajuan Cuti Pending (Menunggu Keputusan)
+    $finalPending = [];
     if (isset($dbPending) && $dbPending->count() > 0) {
         foreach ($dbPending as $req) {
             if ($req->user) {
@@ -42,7 +42,7 @@
                 $endFmt = \Carbon\Carbon::parse($req->end_date)->format('d/m/Y');
                 $period = ($startFmt === $endFmt) ? $startFmt : ($startFmt . ' – ' . $endFmt);
                 $type = $req->leaveType->name ?? 'Cuti';
-                $realPending[] = [
+                $finalPending[] = [
                     'name' => $req->user->name,
                     'subtitle' => $type . ' (' . ($req->total_days ?? 1) . ' hari) • ' . $period,
                     'is_real' => true,
@@ -51,8 +51,8 @@
         }
     }
 
-    // D. Real Cuti Ditolak (dari $dbRejected)
-    $realRejected = [];
+    // D. Cuti Ditolak
+    $finalRejected = [];
     if (isset($dbRejected) && $dbRejected->count() > 0) {
         foreach ($dbRejected as $req) {
             if ($req->user) {
@@ -60,7 +60,7 @@
                 $endFmt = \Carbon\Carbon::parse($req->end_date)->format('d/m/Y');
                 $period = ($startFmt === $endFmt) ? $startFmt : ($startFmt . ' – ' . $endFmt);
                 $type = $req->leaveType->name ?? 'Cuti';
-                $realRejected[] = [
+                $finalRejected[] = [
                     'name' => $req->user->name,
                     'subtitle' => $type . ' • ' . $period,
                     'is_real' => true,
@@ -68,79 +68,6 @@
             }
         }
     }
-
-    // =========================================================================
-    // 2. DATA DUMMY / DEMO (Bisa dipertahankan atau dikosongkan sewaktu-waktu)
-    // =========================================================================
-    // Jika dummy dihapus (cukup kosongkan array $demoEmployees dsb), data otomatis 100% murni dari database!
-    $demoEmployees = [
-        ['name' => 'Budi Santoso', 'subtitle' => 'Senior Frontend Developer • Technology & IT', 'is_real' => false],
-        ['name' => 'Siti Rahmawati', 'subtitle' => 'Content Specialist • Digital Marketing', 'is_real' => false],
-        ['name' => 'Dimas Prasetyo', 'subtitle' => 'UI/UX Designer • Product & Design', 'is_real' => false],
-        ['name' => 'Ayu Pratiwi', 'subtitle' => 'Recruitment Officer • Human Resources', 'is_real' => false],
-        ['name' => 'Putri Wulandari', 'subtitle' => 'Finance Staff • Finance & Accounting', 'is_real' => false],
-        ['name' => 'Yanto Nugroho', 'subtitle' => 'Backend Engineer • Technology & IT', 'is_real' => false],
-        ['name' => 'Yanti Kusuma', 'subtitle' => 'CS Lead • Customer Success', 'is_real' => false],
-        ['name' => 'Putra Pratama', 'subtitle' => 'DevOps Specialist • Technology & IT', 'is_real' => false],
-        ['name' => 'Dani Firmansyah', 'subtitle' => 'Account Executive • Sales & Business', 'is_real' => false],
-        ['name' => 'Titi Handayani', 'subtitle' => 'Product Manager • Product & Design', 'is_real' => false],
-        ['name' => 'Rian Hidayat', 'subtitle' => 'Mobile Developer • Technology & IT', 'is_real' => false],
-        ['name' => 'Maya Anggraini', 'subtitle' => 'SEO & SEM Specialist • Digital Marketing', 'is_real' => false],
-    ];
-
-    $demoApproved = [
-        ['name' => 'Budi Santoso', 'subtitle' => 'Cuti Tahunan (3 hari) • 11/10/2026 – 13/10/2026', 'is_real' => false],
-        ['name' => 'Dimas Prasetyo', 'subtitle' => 'Cuti Sakit (2 hari) • 17/10/2026 – 18/10/2026', 'is_real' => false],
-        ['name' => 'Titi Handayani', 'subtitle' => 'Cuti Tahunan (3 hari) • 11/10/2026 – 13/10/2026', 'is_real' => false],
-        ['name' => 'Putri Wulandari', 'subtitle' => 'Cuti Tahunan (3 hari) • 11/10/2026 – 13/10/2026', 'is_real' => false],
-        ['name' => 'Ayu Pratiwi', 'subtitle' => 'Cuti Sakit (3 hari) • 05/10/2026 – 07/10/2026', 'is_real' => false],
-        ['name' => 'Yanto Nugroho', 'subtitle' => 'Cuti Tahunan (3 hari) • 02/10/2026 – 04/10/2026', 'is_real' => false],
-        ['name' => 'Yanti Kusuma', 'subtitle' => 'Cuti Menikah (3 hari) • 08/10/2026 – 10/10/2026', 'is_real' => false],
-        ['name' => 'Putra Pratama', 'subtitle' => 'Cuti Tahunan (2 hari) • 14/10/2026 – 15/10/2026', 'is_real' => false],
-        ['name' => 'Dani Firmansyah', 'subtitle' => 'Cuti Tahunan (2 hari) • 18/10/2026 – 19/10/2026', 'is_real' => false],
-    ];
-
-    $demoPending = [
-        ['name' => 'Siti Rahmawati', 'subtitle' => 'Cuti Tahunan (2 hari) • 11/10/2026 – 13/10/2026', 'is_real' => false],
-        ['name' => 'Budi Santoso', 'subtitle' => 'Cuti Tahunan (2 hari) • 25/10/2026 – 26/10/2026', 'is_real' => false],
-        ['name' => 'Maya Anggraini', 'subtitle' => 'Cuti Tahunan (3 hari) • 22/10/2026 – 24/10/2026', 'is_real' => false],
-        ['name' => 'Rian Hidayat', 'subtitle' => 'Cuti Penting (2 hari) • 23/10/2026 – 24/10/2026', 'is_real' => false],
-        ['name' => 'Ayu Pratiwi', 'subtitle' => 'Cuti Tahunan (3 hari) • 28/10/2026 – 30/10/2026', 'is_real' => false],
-        ['name' => 'Putri Wulandari', 'subtitle' => 'Cuti Tahunan (2 hari) • 27/10/2026 – 28/10/2026', 'is_real' => false],
-        ['name' => 'Yanto Nugroho', 'subtitle' => 'Cuti Sakit (2 hari) • 21/10/2026 – 22/10/2026', 'is_real' => false],
-        ['name' => 'Yanti Kusuma', 'subtitle' => 'Cuti Tahunan (3 hari) • 29/10/2026 – 31/10/2026', 'is_real' => false],
-        ['name' => 'Putra Pratama', 'subtitle' => 'Cuti Tahunan (2 hari) • 24/10/2026 – 25/10/2026', 'is_real' => false],
-        ['name' => 'Dani Firmansyah', 'subtitle' => 'Cuti Tahunan (2 hari) • 26/10/2026 – 27/10/2026', 'is_real' => false],
-        ['name' => 'Dimas Prasetyo', 'subtitle' => 'Cuti Tahunan (2 hari) • 30/10/2026 – 31/10/2026', 'is_real' => false],
-    ];
-
-    $demoRejected = [
-        ['name' => 'Dimas Prasetyo', 'subtitle' => 'Cuti Tahunan • 01/10/2026 – 03/10/2026', 'is_real' => false],
-        ['name' => 'Dani Firmansyah', 'subtitle' => 'Cuti Tahunan • 05/10/2026 – 08/10/2026', 'is_real' => false],
-    ];
-
-    // =========================================================================
-    // 3. PENGGABUNGAN DATA (DATA REAL DATABASE PRIORITAS PERTAMA / DI ATAS)
-    // =========================================================================
-    $mergeCardData = function ($realList, $demoList) {
-        $result = $realList;
-        $realNamesLower = array_map(function($item) {
-            return strtolower(trim($item['name']));
-        }, $realList);
-
-        foreach ($demoList as $demo) {
-            // Jika nama demo belum ada di daftar nama real, tambahkan ke fallback
-            if (!in_array(strtolower(trim($demo['name'])), $realNamesLower)) {
-                $result[] = $demo;
-            }
-        }
-        return $result;
-    };
-
-    $finalEmployees = $mergeCardData($realEmployees, $demoEmployees);
-    $finalApproved  = $mergeCardData($realApproved, $demoApproved);
-    $finalPending   = $mergeCardData($realPending, $demoPending);
-    $finalRejected  = $mergeCardData($realRejected, $demoRejected);
 
     $countEmployees = count($finalEmployees);
     $countApproved  = count($finalApproved);
