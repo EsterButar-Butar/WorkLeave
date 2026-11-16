@@ -124,9 +124,23 @@ class LeaveRequestController extends Controller
             // Validasi input data dari form
             $data = $request->validated();
 
-            // Jika ada upload file bukti lampiran, simpan ke storage public
+            // Simpan lampiran dengan nama asli mitra
             if ($request->hasFile('attachment')) {
-                $path = $request->file('attachment')->store('leave_attachments', 'public');
+                $file = $request->file('attachment');
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $extension = $file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'pdf';
+
+                // Bersihkan karakter berbahaya dari nama file
+                $safeName = preg_replace('/[^\w\s\-\.]+/u', '', $originalName);
+                $safeName = trim($safeName) ?: 'dokumen_pendukung';
+                $fileName = $safeName . '.' . $extension;
+
+                // Cegah duplikasi nama file di storage
+                if (Storage::disk('public')->exists('leave_attachments/' . $fileName)) {
+                    $fileName = $safeName . '_' . time() . '.' . $extension;
+                }
+
+                $path = $file->storeAs('leave_attachments', $fileName, 'public');
                 $data['attachment_path'] = $path;
             }
 
@@ -169,9 +183,21 @@ class LeaveRequestController extends Controller
             abort(404, 'File lampiran tidak ditemukan di penyimpanan server.');
         }
 
+        // Ambil nama asli file untuk unduhan
+        $downloadName = basename($leaveRequest->attachment_path);
+        // Hapus penanda timestamp jika ada
+        $cleanDownloadName = preg_replace('/_\d{10}(?=\.[^.]+$)/', '', $downloadName);
+
+        // Fallback jika file lama masih nama acak
+        $nameOnly = pathinfo($cleanDownloadName, PATHINFO_FILENAME);
+        $extension = pathinfo($cleanDownloadName, PATHINFO_EXTENSION);
+        if (strlen($nameOnly) >= 32 && !str_contains($nameOnly, ' ') && !str_contains($nameOnly, '_') && !str_contains($nameOnly, '-')) {
+            $cleanDownloadName = 'dokumen_pendukung_' . $leaveRequest->id . '.' . $extension;
+        }
+
         return response()->download(
             Storage::disk('public')->path($leaveRequest->attachment_path),
-            basename($leaveRequest->attachment_path)
+            $cleanDownloadName
         );
     }
 

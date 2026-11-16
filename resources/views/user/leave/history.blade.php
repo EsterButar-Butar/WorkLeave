@@ -155,7 +155,8 @@
                                                 ? $startDateFormatted
                                                 : (\Carbon\Carbon::parse($req->start_date)->translatedFormat('d') . ' - ' . $endDateFormatted);
                                             $createdFormatted = \Carbon\Carbon::parse($req->created_at)->translatedFormat('d F Y');
-                                            $attachmentName = $req->attachment_path ? basename($req->attachment_path) : null;
+                                            // Nama file asli dari mitra
+                                            $attachmentName = $req->attachment_path ? preg_replace('/_\d{10}(?=\.[^.]+$)/', '', basename($req->attachment_path)) : null;
                                             $attachmentUrl = $req->attachment_path ? route('leave.attachment', $req->id) : null;
                                         @endphp
                                         <tr class="hover:bg-gray-50/50 transition-colors">

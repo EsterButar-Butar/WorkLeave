@@ -23,7 +23,8 @@
         $periodShort = ($startShort === $endShort) ? $startShort : ($startShort . ' – ' . $endShort);
         
         $timeAgo = $latestPending->created_at ? $latestPending->created_at->diffForHumans() : 'Baru saja';
-        $attachmentName = $latestPending->attachment_path ? basename($latestPending->attachment_path) : null;
+        // Nama lampiran dokumen dari mitra
+        $attachmentName = $latestPending->attachment_path ? preg_replace('/_\d{10}(?=\.[^.]+$)/', '', basename($latestPending->attachment_path)) : null;
     }
 @endphp
 
@@ -93,9 +94,9 @@
             </div>
 
             @if ($pendingCount > 1)
-                <a href="{{ route('admin.approvals') }}" class="text-[11px] font-semibold text-[#C12132] hover:underline">
+                <button type="button" onclick="openCardModal('pending')" class="text-[11px] font-semibold text-[#C12132] hover:underline cursor-pointer">
                     +{{ $pendingCount - 1 }} lainnya &rarr;
-                </a>
+                </button>
             @endif
         </div>
 

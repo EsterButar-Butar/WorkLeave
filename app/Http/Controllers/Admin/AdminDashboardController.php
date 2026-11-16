@@ -171,7 +171,8 @@ class AdminDashboardController extends Controller
                     'status_bg' => $statusBadge['bg'],
                     'status_text' => $statusBadge['text'],
                     'note' => $r->reason ?? '-',
-                    'file' => $r->attachment_path ? basename($r->attachment_path) : null,
+                    // Nama file asli dari mitra
+                    'file' => $r->attachment_path ? preg_replace('/_\d{10}(?=\.[^.]+$)/', '', basename($r->attachment_path)) : null,
                     'file_url' => $r->attachment_path ? route('leave.attachment', $r->id) : null,
                     'is_real' => true,
                 ];

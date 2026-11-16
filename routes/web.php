@@ -199,9 +199,9 @@ Route::prefix('admin')
         );
 
 
-        // Halaman daftar persetujuan cuti
+        // Arahkan ke modal daftar pengajuan pending di dashboard admin
         Route::get('/approvals', function () {
-            return view('admin.approvals.index');
+            return redirect()->route('admin.dashboard', ['tab' => 'pending']);
         })->name('admin.approvals');
 
 

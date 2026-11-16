@@ -378,6 +378,13 @@
 
     // Event listener: Tutup jika klik backdrop di luar konten
     document.addEventListener('DOMContentLoaded', function () {
+        // Buka otomatis tab modal jika ada parameter tab di URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        if (tabParam && ['total_pegawai', 'disetujui', 'pending', 'ditolak'].includes(tabParam)) {
+            openCardModal(tabParam);
+        }
+
         const modal = document.getElementById('cardDetailModal');
         if (modal) {
             modal.addEventListener('click', function (e) {
