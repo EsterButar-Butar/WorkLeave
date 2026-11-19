@@ -3,37 +3,53 @@
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends FormRequest
 {
-    // Otorisasi apakah pengguna diizinkan melakukan request ini
     public function authorize(): bool
     {
         return true;
     }
 
-    // Aturan validasi input untuk pendaftaran pengguna baru
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'email' => [
+                'required',
+                'string',
+                'lowercase',
+                'email',
+                'max:255',
+                'unique:users,email',
+            ],
+
+            'password' => [
+                'required',
+                'confirmed',
+                Password::min(8)
+                    ->letters()
+                    ->numbers()
+                    ->symbols(),
+            ],
         ];
     }
 
-    // Pesan kustom validasi dalam bahasa Indonesia
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama pengguna wajib diisi.',
-            'name.max' => 'Nama pengguna maksimal 255 karakter.',
-            'email.required' => 'Alamat email wajib diisi.',
+            'name.required' => 'Nama wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
-            'email.max' => 'Alamat email maksimal 255 karakter.',
-            'email.unique' => 'Alamat email ini sudah terdaftar.',
-            'password.required' => 'Kata sandi wajib diisi.',
-            'password.min' => 'Kata sandi minimal 8 karakter.',
+            'email.unique' => 'Email sudah terdaftar.',
+            'password.required' => 'Password wajib diisi.',
+            'password.confirmed' => 'Konfirmasi password tidak sesuai.',
         ];
     }
 }
